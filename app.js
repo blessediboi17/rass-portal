@@ -1,24 +1,33 @@
-// Set your deadline here (Year, Month [0-11], Day, Hour, Minute)
-const DEADLINE = new Date('2026-02-01T23:59:59'); 
+// 1. Setup Connection (Get these from your Supabase Settings > API)
+const supabaseUrl = 'YOUR_SUPABASE_URL';
+const supabaseKey = 'YOUR_SUPABASE_ANON_KEY';
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-function checkLockStatus() {
+// 2. The Deadline Check
+const DEADLINE = new Date('2026-02-01T23:59:59');
+
+async function handleLogin() {
+    const email = document.getElementById('teacher-id').value;
+    const password = document.getElementById('password').value;
     const now = new Date();
-    const statusMsg = document.getElementById('status-msg');
-    const loginForm = document.getElementById('login-form');
 
+    // Check if Portal is Locked first
     if (now > DEADLINE) {
-        // Portal is LOCKED
-        loginForm.style.display = 'none';
-        statusMsg.innerHTML = `
-            <div class="locked-box">
-                <h3 style="color: red;">Portal Locked</h3>
-                <p>The grading deadline (Feb 1, 2026) has passed.</p>
-                <p>Please contact the RASS Administration office for late submissions.</p>
-            </div>
-        `;
-    } else {
-        // Portal is OPEN
-        alert("Accessing Grading System... (System Open)");
-        // Here we would redirect to the grade entry page
+        alert("The grading window has closed. Access denied.");
+        return;
     }
-}
+
+    // Attempt to Login
+    const { data, error } = await _supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+    });
+
+    if (error) {
+        alert("Login failed: " + error.message);
+    } else {
+        alert("Welcome to RASS Portal!");
+        // Redirect to the grading sheet page
+        window.location.href = "grades.html"; 
+    }
+        }
