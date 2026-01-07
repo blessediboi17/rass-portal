@@ -3,93 +3,108 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASS | Teacher Grading Portal</title>
-    <link rel="stylesheet" href="style.css">
+    <title>RASS | Grading Portal</title>
     <style>
-        /* Basic styling to ensure it looks like your screenshot */
-        body {
-            font-family: 'Segoe UI', Arial, sans-serif;
-            background-color: #f4f7f9;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-        .container {
-            background: white;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
-            text-align: center;
-            width: 90%;
-            max-width: 400px;
-        }
-        .logo {
-            width: 100px;
-            height: auto;
-            margin-bottom: 20px;
-        }
-        h1 {
-            color: #003366;
-            margin-bottom: 5px;
-            font-size: 24px;
-        }
-        .subtitle {
-            color: #666;
-            margin-bottom: 30px;
-            font-size: 16px;
-        }
-        input {
-            width: 100%;
-            padding: 12px;
-            margin: 10px 0;
-            border: 1px solid #ccc;
-            border-radius: 8px;
-            box-sizing: border-box; /* Important for padding */
-        }
-        button {
-            width: 100%;
-            padding: 12px;
-            background-color: #003366;
-            color: white;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            margin-top: 20px;
-            transition: background 0.3s;
-        }
-        button:hover {
-            background-color: #002244;
-        }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #003366; margin-bottom: 20px; padding-bottom: 10px; }
+        .logo { width: 100px; }
+        h1 { color: #003366; margin: 5px 0; }
+        
+        /* Table Styling */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #003366; color: white; }
+        input[type="number"], input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        .btn { background: #003366; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 20px; }
+        .btn:hover { background: #002244; }
+        
+        #grading-section { display: none; } /* Hidden until button click */
     </style>
 </head>
 <body>
 
     <div class="container">
-        <header>
+        <div class="header">
             <img src="IMG_20260107_084912.jpg" alt="RASS Logo" class="logo">
             <h1>Royal Academy School System</h1>
-            <p class="subtitle">Teacher Grading Portal</p>
-        </header>
-
-        <div id="login-form">
-            <h2 style="margin-bottom: 20px;">Teacher Login</h2>
-            
-            <input type="text" id="teacher-id" placeholder="Teacher ID">
-            <input type="password" id="password" placeholder="Password">
-            
-            <button type="button" onclick="teacherLogin()">Access Grading System</button>
+            <p>Official Academic Grading Portal</p>
         </div>
-        
-        <div id="status-msg" style="margin-top: 15px; font-size: 14px;"></div>
+
+        <div id="welcome-screen" style="text-align: center;">
+            <h2>Welcome, Teacher</h2>
+            <p>Click below to start entering student grades for this term.</p>
+            <button class="btn" onclick="showGrades()">Enter Grade Sheet</button>
+        </div>
+
+        <div id="grading-section">
+            <h3>Student Information</h3>
+            <input type="text" id="student-name" placeholder="Enter Student Full Name" style="margin-bottom: 20px; width: 300px; padding: 10px;">
+            
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Score (0-100)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subject-list">
+                        </tbody>
+                </table>
+            </div>
+            <button class="btn" onclick="submitGrades()">Submit to Database</button>
+            <p id="status"></p>
+        </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script src="app.js"></script>
+    <script>
+        const subjects = ["Math", "English", "General Science", "Health Science", "Bible", "Spelling", "Social Studies", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Learning Skills"];
+        
+        // Show the 13 subjects in the table automatically
+        const tableBody = document.getElementById('subject-list');
+        subjects.forEach(sub => {
+            let row = `<tr>
+                <td>${sub}</td>
+                <td><input type="number" id="${sub.replace(/\s+/g, '-').toLowerCase()}" placeholder="Enter score"></td>
+            </tr>`;
+            tableBody.innerHTML += row;
+        });
 
+        function showGrades() {
+            document.getElementById('welcome-screen').style.display = 'none';
+            document.getElementById('grading-section').style.display = 'block';
+        }
+
+        // DATABASE CONNECTION
+        const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function submitGrades() {
+            const name = document.getElementById('student-name').value;
+            if(!name) { alert("Please enter student name"); return; }
+
+            const scores = {};
+            subjects.forEach(sub => {
+                const id = sub.replace(/\s+/g, '-').toLowerCase();
+                scores[id] = document.getElementById(id).value;
+            });
+
+            const { data, error } = await _supabase
+                .from('grades')
+                .insert([{ student_name: name, scores: scores, term: "Term 1" }]);
+
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                document.getElementById('status').innerHTML = "✅ Grades saved successfully!";
+                alert("Success!");
+            }
+        }
+    </script>
 </body>
-    </html>
+            </html>
