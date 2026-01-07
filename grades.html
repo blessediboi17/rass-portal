@@ -1,19 +1,29 @@
-<table>
-    <thead>
-        <tr>
-            <th>Student Name</th>
-            <th>Subject</th>
-            <th>Grade (0-100)</th>
-            <th>Comments</th>
-        </tr>
-    </thead>
-    <tbody id="grade-table-body">
-        <tr>
-            <td>John Doe</td>
-            <td>Mathematics</td>
-            <td><input type="number" min="0" max="100"></td>
-            <td><input type="text"></td>
-        </tr>
-    </tbody>
-</table>
-<button onclick="saveGrades()">Submit All Grades</button>
+<div class="gradebook-container">
+    <h2>RASS Grade Entry Sheet</h2>
+    <div class="table-wrapper">
+        <table id="grade-table">
+            <thead>
+                <tr>
+                    <th>Student Name</th>
+                    <th>Math</th>
+                    <th>English</th>
+                    <th>Gen. Science</th>
+                    <th>Health Sci.</th>
+                    <th>Bible</th>
+                    <th>Spelling</th>
+                    <th>Social Studies</th>
+                    <th>Reading</th>
+                    <th>Drawing</th>
+                    <th>Phonics</th>
+                    <th>Writing</th>
+                    <th>P.E.</th>
+                    <th>Learning Skills</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody id="student-rows">
+                </tbody>
+        </table>
+    </div>
+    <button class="save-btn" onclick="submitGrades()">Submit Final Grades</button>
+    </div>
