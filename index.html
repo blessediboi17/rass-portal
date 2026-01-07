@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASS | Teacher Grading Portal</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div class="container">
+        <header>
+            <img src="logo.png" alt="RASS Logo" class="logo">
+            <h1>Royal Academy School System</h1>
+            <p>Teacher Grading Portal</p>
+        </header>
+
+        <main id="portal-content">
+            <div id="login-form">
+                <h2>Teacher Login</h2>
+                <input type="text" id="teacher-id" placeholder="Teacher ID">
+                <input type="password" id="password" placeholder="Password">
+                <button onclick="checkLockStatus()">Access Grading System</button>
+            </div>
+            
+            <div id="status-msg"></div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+      </html>
