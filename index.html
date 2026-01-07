@@ -5,29 +5,91 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>RASS | Teacher Grading Portal</title>
     <link rel="stylesheet" href="style.css">
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        /* Basic styling to ensure it looks like your screenshot */
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background-color: #f4f7f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+        .container {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            text-align: center;
+            width: 90%;
+            max-width: 400px;
+        }
+        .logo {
+            width: 100px;
+            height: auto;
+            margin-bottom: 20px;
+        }
+        h1 {
+            color: #003366;
+            margin-bottom: 5px;
+            font-size: 24px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+            font-size: 16px;
+        }
+        input {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            box-sizing: border-box; /* Important for padding */
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #003366;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background-color: #002244;
+        }
+    </style>
 </head>
 <body>
 
     <div class="container">
         <header>
-            <img src="logo.png" alt="RASS Logo" class="logo">
+            <img src="IMG_20260107_084912.jpg" alt="RASS Logo" class="logo">
             <h1>Royal Academy School System</h1>
-            <p>Teacher Grading Portal</p>
+            <p class="subtitle">Teacher Grading Portal</p>
         </header>
 
-        <main id="portal-content">
-            <div id="login-form">
-                <h2>Teacher Login</h2>
-                <input type="text" id="teacher-id" placeholder="Teacher ID">
-                <input type="password" id="password" placeholder="Password">
-                <button onclick="checkLockStatus()">Access Grading System</button>
-            </div>
+        <div id="login-form">
+            <h2 style="margin-bottom: 20px;">Teacher Login</h2>
             
-            <div id="status-msg"></div>
-        </main>
+            <input type="text" id="teacher-id" placeholder="Teacher ID">
+            <input type="password" id="password" placeholder="Password">
+            
+            <button type="button" onclick="teacherLogin()">Access Grading System</button>
+        </div>
+        
+        <div id="status-msg" style="margin-top: 15px; font-size: 14px;"></div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="app.js"></script>
+
 </body>
-      </html>
+    </html>
