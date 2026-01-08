@@ -24,6 +24,37 @@
         .btn { background: #003366; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; flex: 1; }
         .btn-reset { background: #666; }
         #status { margin-top: 15px; font-weight: bold; text-align: center; }
+        const subjects = ["Math", "English", "General Science", "Health Science", "Bible", "Spelling", "Social Studies", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Learning Skills"];
+const periods = ["p1", "p2", "p3", "sem1_exam", "p4", "p5", "p6", "final_exam"];
+
+const tableBody = document.getElementById('subject-rows');
+
+subjects.forEach(sub => {
+    let row = `<tr><td style="text-align:left; font-weight:bold;">${sub}</td>`;
+    periods.forEach(p => {
+        const inputId = `${sub.replace(/\s+/g, '').toLowerCase()}_${p}`;
+        // The 'oninput' part checks the number as you type
+        row += `<td><input type="number" id="${inputId}" placeholder="-" oninput="checkFailure(this)"></td>`;
+    });
+    row += `</tr>`;
+    tableBody.innerHTML += row;
+});
+
+// Function to turn text red if below 75
+function checkFailure(input) {
+    const score = parseFloat(input.value);
+    if (input.value !== "" && score < 75) {
+        input.style.color = "red";
+        input.style.fontWeight = "bold";
+        input.style.borderColor = "red";
+    } else {
+        input.style.color = "black";
+        input.style.fontWeight = "normal";
+        input.style.borderColor = "#ccc";
+    }
+}
+
+// ... keep your existing _supabase connection and submitGrades() function here ...
     </style>
 </head>
 <body>
