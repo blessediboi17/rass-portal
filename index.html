@@ -54,7 +54,12 @@ function checkFailure(input) {
     }
 }
 
-// ... keep your existing _supabase connection and submitGrades() function here ...
+ // 1. Supabase Configuration
+const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
+const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
+
+// Initialize the Supabase Client
+const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
     </style>
 </head>
 <body>
