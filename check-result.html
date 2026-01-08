@@ -1,13 +1,155 @@
-by<div class="student-box">
-    <img src="logo.png" alt="RASS Logo" class="logo">
-    <h2>Student Result Portal</h2>
-    <input type="text" id="student-query" placeholder="Enter your Full Name">
-    <button onclick="viewMyGrades()">View Results</button>
-    
-    <div id="result-display"></div>
-      </div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>RASS | Student Result Portal</title>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; }
+        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #003366; margin-bottom: 20px; }
+        .logo { width: 80px; }
+        h1 { color: #003366; font-size: 22px; }
+        
+        .search-box { text-align: center; margin-bottom: 30px; background: #eef2f7; padding: 20px; border-radius: 8px; }
+        input[type="text"] { width: 60%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
+        .btn { background: #003366; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        
+        .report-card { display: none; margin-top: 20px; }
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
+        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
+        th { background-color: #003366; color: white; }
+        .subject-name { text-align: left; font-weight: bold; background: #f9f9f9; }
+        .avg-col { background-color: #eef2f7; font-weight: bold; color: #003366; }
+        .failing { color: red; font-weight: bold; }
+        
+        .summary-box { margin-top: 20px; padding: 15px; border: 2px solid #003366; border-radius: 8px; text-align: right; font-size: 18px; }
+        
+        @media print {
+            .search-box, .btn, .nav-links { display: none !important; }
+            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+        }
+    </style>
+</head>
 <body>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script src="student.js"></script>
+
+    <div class="container">
+        <div class="header">
+            <img src="IMG_20260107_084912.jpg" alt="RASS Logo" class="logo">
+            <h1>Royal Academy School System</h1>
+            <p>Student Academic Progress Report</p>
+        </div>
+
+        <div class="search-box">
+            <h3>Check Your Results</h3>
+            <input type="text" id="search-name" placeholder="Enter Student's Full Name">
+            <button class="btn" onclick="fetchResult()">View Report Card</button>
+        </div>
+
+        <div id="status-msg" style="text-align: center; font-weight: bold;"></div>
+
+        <div id="report-card" class="report-card">
+            <h2 id="display-name" style="color: #003366; text-align: center; margin-bottom: 5px;"></h2>
+            <p id="display-year" style="text-align: center; font-weight: bold; margin-top: 0;"></p>
+            
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>1st</th><th>2nd</th><th>3rd</th><th>Exam 1</th>
+                            <th>4th</th><th>5th</th><th>6th</th><th>Final</th>
+                            <th class="avg-col">AVG</th>
+                        </tr>
+                    </thead>
+                    <tbody id="result-rows"></tbody>
+                </table>
+            </div>
+
+            <div class="summary-box">
+                <strong>Annual General Average: </strong>
+                <span id="grand-average" style="color: #003366; font-weight: bold;">0.00%</span>
+            </div>
+            
+            <div class="nav-links" style="margin-top:20px; display:flex; gap:10px;">
+                <button class="btn" style="flex:1; background: #28a745;" onclick="window.print()">Print / Save as PDF</button>
+                <button class="btn" style="flex:1; background: #666;" onclick="location.reload()">Search Another</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
+        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+
+        async function fetchResult() {
+            const nameInput = document.getElementById('search-name').value.trim();
+            const status = document.getElementById('status-msg');
+            const card = document.getElementById('report-card');
+            const tableBody = document.getElementById('result-rows');
+
+            if(!nameInput) { alert("Please enter a student name"); return; }
+
+            status.innerHTML = "Fetching Records...";
+            card.style.display = "none";
+            tableBody.innerHTML = "";
+
+            const { data, error } = await _supabase
+                .from('grades')
+                .select('*')
+                .ilike('student_name', nameInput)
+                .order('created_at', { ascending: false })
+                .limit(1);
+
+            if (error) {
+                status.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
+            } else if (data.length === 0) {
+                status.innerHTML = `<span style="color:orange;">No record found for "${nameInput}".</span>`;
+            } else {
+                status.innerHTML = "";
+                const record = data[0];
+                const scores = record.scores;
+                let totalSumOfAverages = 0;
+                let subjectCount = 0;
+
+                document.getElementById('display-name').innerText = record.student_name.toUpperCase();
+                document.getElementById('display-year').innerText = "Academic Year: " + record.academic_year;
+
+                for (const sub in scores) {
+                    let row = `<tr><td class="subject-name">${sub.replace(/-/g, ' ').toUpperCase()}</td>`;
+                    const periods = ["p1", "p2", "p3", "sem1_exam", "p4", "p5", "p6", "final_exam"];
+                    
+                    let subTotal = 0;
+                    let periodsCounted = 0;
+
+                    periods.forEach(p => {
+                        const val = parseFloat(scores[sub][p]) || 0;
+                        subTotal += val;
+                        if(val > 0) periodsCounted++;
+                        
+                        const failClass = (val > 0 && val < 75) ? 'failing' : '';
+                        row += `<td class="${failClass}">${val || '-'}</td>`;
+                    });
+
+                    // Calculate Subject Average
+                    const subAvg = periodsCounted > 0 ? (subTotal / 8).toFixed(2) : 0;
+                    totalSumOfAverages += parseFloat(subAvg);
+                    subjectCount++;
+
+                    row += `<td class="avg-col">${subAvg}</td></tr>`;
+                    tableBody.innerHTML += row;
+                }
+
+                // Calculate Grand Average
+                const grandAvg = subjectCount > 0 ? (totalSumOfAverages / subjectCount).toFixed(2) : 0;
+                document.getElementById('grand-average').innerText = grandAvg + "%";
+                
+                card.style.display = "block";
+            }
+        }
+    </script>
 </body>
+    </html>
