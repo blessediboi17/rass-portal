@@ -3,25 +3,27 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASS | Grading Portal</title>
+    <title>RASS | Annual Grading Portal</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #003366; margin-bottom: 20px; padding-bottom: 10px; }
-        .logo { width: 100px; }
-        h1 { color: #003366; margin: 5px 0; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; }
+        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .header { text-align: center; border-bottom: 2px solid #003366; margin-bottom: 20px; }
+        .logo { width: 80px; }
+        h1 { color: #003366; font-size: 22px; }
         
-        /* Table Styling */
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background-color: #003366; color: white; }
-        input[type="number"], input[type="text"] { width: 100%; padding: 8px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        /* Table Layout */
+        .table-wrapper { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; font-size: 13px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background-color: #003366; color: white; white-space: nowrap; }
+        input { width: 50px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+        .student-info { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .info-box { flex: 1; min-width: 200px; }
         
-        .btn { background: #003366; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; margin-top: 20px; }
-        .btn:hover { background: #002244; }
-        
-        #grading-section { display: none; } /* Hidden until button click */
+        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+        .btn { background: #003366; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; flex: 1; }
+        .btn-reset { background: #666; }
+        #status { margin-top: 15px; font-weight: bold; text-align: center; }
     </style>
 </head>
 <body>
@@ -30,81 +32,105 @@
         <div class="header">
             <img src="IMG_20260107_084912.jpg" alt="RASS Logo" class="logo">
             <h1>Royal Academy School System</h1>
-            <p>Official Academic Grading Portal</p>
+            <p>Annual Academic Record</p>
         </div>
 
-        <div id="welcome-screen" style="text-align: center;">
-            <h2>Welcome, Teacher</h2>
-            <p>Click below to start entering student grades for this term.</p>
-            <button class="btn" onclick="showGrades()">Enter Grade Sheet</button>
-        </div>
-
-        <div id="grading-section">
-            <h3>Student Information</h3>
-            <input type="text" id="student-name" placeholder="Enter Student Full Name" style="margin-bottom: 20px; width: 300px; padding: 10px;">
-            
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>Score (0-100)</th>
-                        </tr>
-                    </thead>
-                    <tbody id="subject-list">
-                        </tbody>
-                </table>
+        <div class="student-info">
+            <div class="info-box">
+                <label>Student Name:</label><br>
+                <input type="text" id="student-name" style="width: 100%; text-align: left;" placeholder="Full Name">
             </div>
-            <button class="btn" onclick="submitGrades()">Submit to Database</button>
-            <p id="status"></p>
+            <div class="info-box">
+                <label>Academic Year:</label><br>
+                <select id="academic-year" style="width: 100%; padding: 8px;">
+                    <option value="2025-2026">2025-2026</option>
+                    <option value="2026-2027">2026-2027</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="table-wrapper">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Subject</th>
+                        <th>1st Per</th>
+                        <th>2nd Per</th>
+                        <th>3rd Per</th>
+                        <th>1st Sem Exam</th>
+                        <th>4th Per</th>
+                        <th>5th Per</th>
+                        <th>6th Per</th>
+                        <th>Final Exam</th>
+                    </tr>
+                </thead>
+                <tbody id="subject-rows">
+                    </tbody>
+            </table>
+        </div>
+
+        <div id="status"></div>
+
+        <div class="btn-group">
+            <button class="btn" onclick="submitGrades()">Save Full Year Record</button>
+            <button class="btn btn-reset" onclick="location.reload()">Clear All</button>
         </div>
     </div>
 
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script>
         const subjects = ["Math", "English", "General Science", "Health Science", "Bible", "Spelling", "Social Studies", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Learning Skills"];
+        const periods = ["p1", "p2", "p3", "sem1_exam", "p4", "p5", "p6", "final_exam"];
         
-        // Show the 13 subjects in the table automatically
-        const tableBody = document.getElementById('subject-list');
+        const tableBody = document.getElementById('subject-rows');
+        
         subjects.forEach(sub => {
-            let row = `<tr>
-                <td>${sub}</td>
-                <td><input type="number" id="${sub.replace(/\s+/g, '-').toLowerCase()}" placeholder="Enter score"></td>
-            </tr>`;
+            let row = `<tr><td style="text-align:left; font-weight:bold;">${sub}</td>`;
+            periods.forEach(p => {
+                const inputId = `${sub.replace(/\s+/g, '').toLowerCase()}_${p}`;
+                row += `<td><input type="number" id="${inputId}" placeholder="-"></td>`;
+            });
+            row += `</tr>`;
             tableBody.innerHTML += row;
         });
 
-        function showGrades() {
-            document.getElementById('welcome-screen').style.display = 'none';
-            document.getElementById('grading-section').style.display = 'block';
-        }
-
-        // DATABASE CONNECTION
+        // SUPABASE CONFIG (Your actual details)
         const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         async function submitGrades() {
             const name = document.getElementById('student-name').value;
+            const year = document.getElementById('academic-year').value;
+            const statusBox = document.getElementById('status');
+            
             if(!name) { alert("Please enter student name"); return; }
+            statusBox.innerHTML = "Uploading to RASS Database...";
 
-            const scores = {};
+            const fullRecord = {};
             subjects.forEach(sub => {
-                const id = sub.replace(/\s+/g, '-').toLowerCase();
-                scores[id] = document.getElementById(id).value;
+                const subKey = sub.replace(/\s+/g, '').toLowerCase();
+                fullRecord[subKey] = {};
+                periods.forEach(p => {
+                    const val = document.getElementById(`${subKey}_${p}`).value;
+                    fullRecord[subKey][p] = val || 0;
+                });
             });
 
             const { data, error } = await _supabase
                 .from('grades')
-                .insert([{ student_name: name, scores: scores, term: "Term 1" }]);
+                .insert([{ 
+                    student_name: name, 
+                    academic_year: year,
+                    scores: fullRecord 
+                }]);
 
             if (error) {
-                alert("Error: " + error.message);
+                statusBox.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
             } else {
-                document.getElementById('status').innerHTML = "✅ Grades saved successfully!";
-                alert("Success!");
+                statusBox.innerHTML = `<span style="color:green;">✅ Full Year Record for ${name} saved!</span>`;
             }
         }
     </script>
 </body>
-            </html>
+                </html>
