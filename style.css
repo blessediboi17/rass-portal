@@ -17,6 +17,15 @@ body {
     width: 100%;
     max-width: 400px;
 }
+input:focus {
+    outline: none;
+    border: 2px solid #003366;
+}
+
+/* This makes the failure color very obvious */
+input[style*="color: red"] {
+    background-color: #fff0f0;
+    }
 
 .logo {
     width: 120px;
