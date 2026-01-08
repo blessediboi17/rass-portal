@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>RASS Grading Portal</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: sans-serif; padding: 20px; background: #f0f2f5; }
+        .box { max-width: 1000px; margin: auto; background: white; padding: 25px; border-radius: 10px; border-top: 5px solid #003366; }
+        .row { display: flex; gap: 15px; margin-bottom: 20px; }
+        .field { flex: 1; }
+        input, select, textarea { width: 100%; padding: 10px; margin-top: 5px; border: 1px solid #ccc; border-radius: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
+        th { background: #003366; color: white; }
+        .fail { color: red !important; border: 2px solid red !important; font-weight: bold; }
+        .save-btn { background: #003366; color: white; padding: 15px; width: 100%; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; font-size: 16px; }
+    </style>
+</head>
+<body>
+
+<div class="box">
+    <h2 style="text-align:center; color:#003366;">Royal Academy Grading Portal</h2>
+    
+    <div class="row">
+        <div class="field">
+            <label>Student Name</label>
+            <input type="text" id="s_name" placeholder="Full Name">
+        </div>
+        <div class="field">
+            <label>Class/Section</label>
+            <select id="s_class">
+                <option>ABC</option><option>K1</option><option>K2</option>
+                <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+                <option>Grade 4</option><option>Grade 5</option>
+            </select>
+        </div>
+        <div class="field">
+            <label>Year</label>
+            <input type="text" id="s_year" value="2025-2026">
+        </div>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th><th>1st</th><th>2nd</th><th>3rd</th><th>Ex1</th>
+                <th>4th</th><th>5th</th><th>6th</th><th>Final</th>
+            </tr>
+        </thead>
+        <tbody id="table-rows"></tbody>
+    </table>
+
+    <div style="margin-top:20px;">
+        <label>Teacher's Remarks</label>
+        <textarea id="s_remarks" placeholder="Enter comments here..."></textarea>
+    </div>
+
+    <div id="msg" style="text-align:center; font-weight:bold; margin-top:10px;"></div>
+    <button class="save-btn" onclick="saveData()">SAVE STUDENT RECORD</button>
+</div>
+
+<script>
+    const subs = ["Math", "English", "Science", "Health", "Bible", "Spelling", "Social Studies", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Skills"];
+    const pers = ["p1", "p2", "p3", "ex1", "p4", "p5", "p6", "ex2"];
+    const tBody = document.getElementById('table-rows');
+
+    subs.forEach(s => {
+        let r = `<tr><td style="text-align:left; font-weight:bold;">${s}</td>`;
+        pers.forEach(p => {
+            let id = `${s.replace(/\s+/g, '').toLowerCase()}_${p}`;
+            r += `<td><input type="number" id="${id}" oninput="check(this)" style="width:50px;"></td>`;
+        });
+        r += `</tr>`;
+        tBody.innerHTML += r;
+    });
+
+    function check(i) {
+        if (i.value !== "" && parseFloat(i.value) < 75) i.classList.add('fail');
+        else i.classList.remove('fail');
+    }
+
+    const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
+
+    async function saveData() {
+        const n = document.getElementById('s_name').value;
+        const c = document.getElementById('s_class').value;
+        const y = document.getElementById('s_year').value;
+        const rem = document.getElementById('s_remarks').value;
+        const msg = document.getElementById('msg');
+
+        if(!n) { alert("Enter Name"); return; }
+        msg.innerHTML = "Saving...";
+
+        let scores = {};
+        subs.forEach(s => {
+            let sk = s.replace(/\s+/g, '').toLowerCase();
+            scores[sk] = {};
+            pers.forEach(p => {
+                scores[sk][p] = document.getElementById(`${sk}_${p}`).value || 0;
+            });
+        });
+
+        const { error } = await _sb.from('grades').insert([{ 
+            student_name: n, 
+            academic_year: y,
+            student_class: c,
+            teacher_remarks: rem,
+            scores: scores 
+        }]);
+
+        if (error) msg.innerHTML = "<span style='color:red;'>Error: " + error.message + "</span>";
+        else msg.innerHTML = "<span style='color:green;'>✅ Saved Successfully!</span>";
+    }
+</script>
+</body>
+  </html>
