@@ -6,60 +6,36 @@
     <title>RASS | Annual Grading Portal</title>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; }
-        .container { max-width: 1200px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .header { text-align: center; border-bottom: 2px solid #003366; margin-bottom: 20px; }
         .logo { width: 80px; }
-        h1 { color: #003366; font-size: 22px; }
+        h1 { color: #003366; font-size: 22px; margin: 5px 0; }
         
         /* Table Layout */
         .table-wrapper { overflow-x: auto; margin-top: 20px; }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
         th { background-color: #003366; color: white; white-space: nowrap; }
-        input { width: 50px; padding: 5px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
-        .student-info { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-        .info-box { flex: 1; min-width: 200px; }
         
-        .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-        .btn { background: #003366; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; flex: 1; }
+        /* Input Styling */
+        input[type="number"] { width: 55px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
+        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
+        
+        /* Red for Failure Logic */
+        input.failing {
+            color: #d00000 !important;
+            border: 2px solid #d00000 !important;
+            font-weight: bold;
+            background-color: #fffafa;
+        }
+
+        .student-info { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
+        .info-box { flex: 1; min-width: 250px; }
+        
+        .btn-group { display: flex; gap: 10px; margin-top: 25px; }
+        .btn { background: #003366; color: white; padding: 14px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; flex: 1; font-weight: bold; }
         .btn-reset { background: #666; }
-        #status { margin-top: 15px; font-weight: bold; text-align: center; }
-        const subjects = ["Math", "English", "General Science", "Health Science", "Bible", "Spelling", "Social Studies", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Learning Skills"];
-const periods = ["p1", "p2", "p3", "sem1_exam", "p4", "p5", "p6", "final_exam"];
-
-const tableBody = document.getElementById('subject-rows');
-
-subjects.forEach(sub => {
-    let row = `<tr><td style="text-align:left; font-weight:bold;">${sub}</td>`;
-    periods.forEach(p => {
-        const inputId = `${sub.replace(/\s+/g, '').toLowerCase()}_${p}`;
-        // The 'oninput' part checks the number as you type
-        row += `<td><input type="number" id="${inputId}" placeholder="-" oninput="checkFailure(this)"></td>`;
-    });
-    row += `</tr>`;
-    tableBody.innerHTML += row;
-});
-
-// Function to turn text red if below 75
-function checkFailure(input) {
-    const score = parseFloat(input.value);
-    if (input.value !== "" && score < 75) {
-        input.style.color = "red";
-        input.style.fontWeight = "bold";
-        input.style.borderColor = "red";
-    } else {
-        input.style.color = "black";
-        input.style.fontWeight = "normal";
-        input.style.borderColor = "#ccc";
-    }
-}
-
- // 1. Supabase Configuration
-const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
-const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
-
-// Initialize the Supabase Client
-const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+        #status { margin-top: 20px; font-weight: bold; text-align: center; font-size: 16px; }
     </style>
 </head>
 <body>
@@ -68,17 +44,17 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
         <div class="header">
             <img src="IMG_20260107_084912.jpg" alt="RASS Logo" class="logo">
             <h1>Royal Academy School System</h1>
-            <p>Annual Academic Record</p>
+            <p>Teacher's Grade Entry Portal</p>
         </div>
 
         <div class="student-info">
             <div class="info-box">
-                <label>Student Name:</label><br>
-                <input type="text" id="student-name" style="width: 100%; text-align: left;" placeholder="Full Name">
+                <label><b>Student Name:</b></label>
+                <input type="text" id="student-name" placeholder="Enter Full Name">
             </div>
             <div class="info-box">
-                <label>Academic Year:</label><br>
-                <select id="academic-year" style="width: 100%; padding: 8px;">
+                <label><b>Academic Year:</b></label>
+                <select id="academic-year" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
                     <option value="2025-2026">2025-2026</option>
                     <option value="2026-2027">2026-2027</option>
                 </select>
@@ -93,7 +69,7 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
                         <th>1st Per</th>
                         <th>2nd Per</th>
                         <th>3rd Per</th>
-                        <th>1st Sem Exam</th>
+                        <th>Sem 1 Exam</th>
                         <th>4th Per</th>
                         <th>5th Per</th>
                         <th>6th Per</th>
@@ -109,7 +85,7 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         <div class="btn-group">
             <button class="btn" onclick="submitGrades()">Save Full Year Record</button>
-            <button class="btn btn-reset" onclick="location.reload()">Clear All</button>
+            <button class="btn btn-reset" onclick="location.reload()">Clear / New Student</button>
         </div>
     </div>
 
@@ -120,28 +96,39 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
         
         const tableBody = document.getElementById('subject-rows');
         
+        // Generate rows and attach the Red-Failure check
         subjects.forEach(sub => {
             let row = `<tr><td style="text-align:left; font-weight:bold;">${sub}</td>`;
             periods.forEach(p => {
                 const inputId = `${sub.replace(/\s+/g, '').toLowerCase()}_${p}`;
-                row += `<td><input type="number" id="${inputId}" placeholder="-"></td>`;
+                row += `<td><input type="number" id="${inputId}" placeholder="-" oninput="checkGrade(this)"></td>`;
             });
             row += `</tr>`;
             tableBody.innerHTML += row;
         });
 
-        // SUPABASE CONFIG (Your actual details)
+        // Function: Turns text RED if score is below 75
+        function checkGrade(input) {
+            const val = parseFloat(input.value);
+            if (input.value !== "" && val < 75) {
+                input.classList.add('failing');
+            } else {
+                input.classList.remove('failing');
+            }
+        }
+
+        // SUPABASE CONNECTION
         const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
         const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
         const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
         async function submitGrades() {
-            const name = document.getElementById('student-name').value;
+            const name = document.getElementById('student-name').value.trim();
             const year = document.getElementById('academic-year').value;
             const statusBox = document.getElementById('status');
             
             if(!name) { alert("Please enter student name"); return; }
-            statusBox.innerHTML = "Uploading to RASS Database...";
+            statusBox.innerHTML = "Saving to RASS Database...";
 
             const fullRecord = {};
             subjects.forEach(sub => {
@@ -153,6 +140,7 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
                 });
             });
 
+            // Uses updated column names: student_name, academic_year, scores
             const { data, error } = await _supabase
                 .from('grades')
                 .insert([{ 
@@ -164,9 +152,10 @@ const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
             if (error) {
                 statusBox.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
             } else {
-                statusBox.innerHTML = `<span style="color:green;">✅ Full Year Record for ${name} saved!</span>`;
+                statusBox.innerHTML = `<span style="color:green;">✅ Success! ${name}'s grades were saved.</span>`;
+                window.scrollTo(0,0);
             }
         }
     </script>
 </body>
-                </html>
+    </html>
