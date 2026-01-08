@@ -1,155 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASS | Student Result Portal</title>
+    <title>RASS | View Report Card</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #003366; margin-bottom: 20px; }
-        .logo { width: 80px; }
-        h1 { color: #003366; font-size: 22px; }
+        body { font-family: 'Times New Roman', serif; background: #f0f2f5; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 40px; border: 1px solid #ccc; }
         
-        .search-box { text-align: center; margin-bottom: 30px; background: #eef2f7; padding: 20px; border-radius: 8px; }
-        input[type="text"] { width: 60%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; font-size: 16px; }
-        .btn { background: #003366; color: white; padding: 12px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; font-weight: bold; }
+        /* Letterhead Styling */
+        .letterhead { text-align: center; border-bottom: 3px double #003366; margin-bottom: 20px; }
+        .logo { width: 100px; }
+        .school-name { color: #003366; font-size: 28px; font-weight: bold; margin: 5px 0; }
         
-        .report-card { display: none; margin-top: 20px; }
-        .table-wrapper { overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; margin-top: 15px; font-size: 14px; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; }
-        th { background-color: #003366; color: white; }
-        .subject-name { text-align: left; font-weight: bold; background: #f9f9f9; }
-        .avg-col { background-color: #eef2f7; font-weight: bold; color: #003366; }
-        .failing { color: red; font-weight: bold; }
+        /* Search Box (Hidden during Print) */
+        .no-print { text-align: center; background: #eef2f7; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #ccc; }
+        input { padding: 12px; width: 300px; border: 1px solid #999; border-radius: 4px; }
+        .btn { background: #003366; color: white; padding: 12px 25px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
+
+        /* Table */
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+        th { background: #f2f2f2; }
+        .failing { color: red !important; font-weight: bold; }
         
-        .summary-box { margin-top: 20px; padding: 15px; border: 2px solid #003366; border-radius: 8px; text-align: right; font-size: 18px; }
-        
+        /* Footer */
+        .footer-area { display: flex; justify-content: space-between; margin-top: 60px; }
+        .sig-box { border-top: 2px solid #000; width: 200px; text-align: center; padding-top: 5px; }
+        .stamp-circle { border: 2px dashed #ccc; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 10px; text-align: center; }
+
         @media print {
-            .search-box, .btn, .nav-links { display: none !important; }
-            .container { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+            .no-print { display: none !important; }
+            body { background: white; padding: 0; }
+            .container { border: none; width: 100%; }
         }
     </style>
 </head>
 <body>
 
-    <div class="container">
-        <div class="header">
-            <img src="IMG_20260107_084912.jpg" alt="RASS Logo" class="logo">
-            <h1>Royal Academy School System</h1>
-            <p>Student Academic Progress Report</p>
-        </div>
+<div class="no-print">
+    <h3>Royal Academy Result Portal</h3>
+    <input type="text" id="studentSearch" placeholder="Enter Student's Full Name">
+    <button class="btn" onclick="searchGrades()">View Result</button>
+</div>
 
-        <div class="search-box">
-            <h3>Check Your Results</h3>
-            <input type="text" id="search-name" placeholder="Enter Student's Full Name">
-            <button class="btn" onclick="fetchResult()">View Report Card</button>
-        </div>
-
-        <div id="status-msg" style="text-align: center; font-weight: bold;"></div>
-
-        <div id="report-card" class="report-card">
-            <h2 id="display-name" style="color: #003366; text-align: center; margin-bottom: 5px;"></h2>
-            <p id="display-year" style="text-align: center; font-weight: bold; margin-top: 0;"></p>
-            
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th>Subject</th>
-                            <th>1st</th><th>2nd</th><th>3rd</th><th>Exam 1</th>
-                            <th>4th</th><th>5th</th><th>6th</th><th>Final</th>
-                            <th class="avg-col">AVG</th>
-                        </tr>
-                    </thead>
-                    <tbody id="result-rows"></tbody>
-                </table>
-            </div>
-
-            <div class="summary-box">
-                <strong>Annual General Average: </strong>
-                <span id="grand-average" style="color: #003366; font-weight: bold;">0.00%</span>
-            </div>
-            
-            <div class="nav-links" style="margin-top:20px; display:flex; gap:10px;">
-                <button class="btn" style="flex:1; background: #28a745;" onclick="window.print()">Print / Save as PDF</button>
-                <button class="btn" style="flex:1; background: #666;" onclick="location.reload()">Search Another</button>
-            </div>
+<div id="reportCard" class="container" style="display:none;">
+    <div class="letterhead">
+        <img src="IMG_20260107_084912.jpg" class="logo">
+        <div class="school-name">ROYAL ACADEMY SCHOOL SYSTEM</div>
+        <div style="font-size: 14px;">
+            Nursery, Kindergarten & Elementary<br>
+            New Life Community, Lower Johnsonville, Liberia<br>
+            <i>"Quality Education for a Brighter Future"</i>
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
+    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 15px;">
+        <span>NAME: <span id="dispName" style="color:#003366"></span></span>
+        <span>CLASS: <span id="dispClass" style="color:#003366"></span></span>
+        <span>YEAR: <span id="dispYear" style="color:#003366"></span></span>
+    </div>
 
-        async function fetchResult() {
-            const nameInput = document.getElementById('search-name').value.trim();
-            const status = document.getElementById('status-msg');
-            const card = document.getElementById('report-card');
-            const tableBody = document.getElementById('result-rows');
+    <table>
+        <thead>
+            <tr>
+                <th>Subject</th><th>1st</th><th>2nd</th><th>3rd</th><th>Ex 1</th>
+                <th>4th</th><th>5th</th><th>6th</th><th>Final</th><th>AVG</th>
+            </tr>
+        </thead>
+        <tbody id="resultBody"></tbody>
+    </table>
 
-            if(!nameInput) { alert("Please enter a student name"); return; }
+    <div style="margin-top: 20px; border: 1px solid #000; padding: 10px;">
+        <strong>TEACHER'S REMARKS:</strong>
+        <p id="dispRemarks" style="font-style: italic; margin: 5px 0;"></p>
+    </div>
 
-            status.innerHTML = "Fetching Records...";
-            card.style.display = "none";
-            tableBody.innerHTML = "";
+    <div class="footer-area">
+        <div class="stamp-circle">OFFICIAL<br>SCHOOL STAMP</div>
+        <div class="sig-box">Principal's Signature</div>
+    </div>
 
-            const { data, error } = await _supabase
-                .from('grades')
-                .select('*')
-                .ilike('student_name', nameInput)
-                .order('created_at', { ascending: false })
-                .limit(1);
+    <button class="btn no-print" onclick="window.print()" style="width: 100%; margin-top: 20px; background: #28a745;">PRINT / SAVE AS PDF</button>
+</div>
 
-            if (error) {
-                status.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
-            } else if (data.length === 0) {
-                status.innerHTML = `<span style="color:orange;">No record found for "${nameInput}".</span>`;
-            } else {
-                status.innerHTML = "";
-                const record = data[0];
-                const scores = record.scores;
-                let totalSumOfAverages = 0;
-                let subjectCount = 0;
+<script>
+    // Supabase Setup
+    const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
 
-                document.getElementById('display-name').innerText = record.student_name.toUpperCase();
-                document.getElementById('display-year').innerText = "Academic Year: " + record.academic_year;
+    async function searchGrades() {
+        const name = document.getElementById('studentSearch').value;
+        const { data, error } = await _sb
+            .from('grades')
+            .select('*')
+            .ilike('student_name', name)
+            .limit(1);
 
-                for (const sub in scores) {
-                    let row = `<tr><td class="subject-name">${sub.replace(/-/g, ' ').toUpperCase()}</td>`;
-                    const periods = ["p1", "p2", "p3", "sem1_exam", "p4", "p5", "p6", "final_exam"];
-                    
-                    let subTotal = 0;
-                    let periodsCounted = 0;
-
-                    periods.forEach(p => {
-                        const val = parseFloat(scores[sub][p]) || 0;
-                        subTotal += val;
-                        if(val > 0) periodsCounted++;
-                        
-                        const failClass = (val > 0 && val < 75) ? 'failing' : '';
-                        row += `<td class="${failClass}">${val || '-'}</td>`;
-                    });
-
-                    // Calculate Subject Average
-                    const subAvg = periodsCounted > 0 ? (subTotal / 8).toFixed(2) : 0;
-                    totalSumOfAverages += parseFloat(subAvg);
-                    subjectCount++;
-
-                    row += `<td class="avg-col">${subAvg}</td></tr>`;
-                    tableBody.innerHTML += row;
-                }
-
-                // Calculate Grand Average
-                const grandAvg = subjectCount > 0 ? (totalSumOfAverages / subjectCount).toFixed(2) : 0;
-                document.getElementById('grand-average').innerText = grandAvg + "%";
+        if (data && data.length > 0) {
+            const student = data[0];
+            document.getElementById('dispName').innerText = student.student_name.toUpperCase();
+            document.getElementById('dispClass').innerText = student.student_class;
+            document.getElementById('dispYear').innerText = student.academic_year;
+            document.getElementById('dispRemarks').innerText = student.teacher_remarks || "No comments.";
+            
+            let tableHTML = "";
+            for (let sub in student.scores) {
+                let subSum = 0;
+                let row = `<tr><td style="text-align:left; font-weight:bold;">${sub.toUpperCase()}</td>`;
+                const periods = ["p1", "p2", "p3", "ex1", "p4", "p5", "p6", "ex2"];
                 
-                card.style.display = "block";
+                periods.forEach(p => {
+                    let score = parseFloat(student.scores[sub][p]) || 0;
+                    subSum += score;
+                    row += `<td class="${(score < 75 && score > 0) ? 'failing' : ''}">${score || '-'}</td>`;
+                });
+                
+                row += `<td style="background:#f9f9f9; font-weight:bold;">${(subSum / 8).toFixed(1)}</td></tr>`;
+                tableHTML += row;
             }
+            document.getElementById('resultBody').innerHTML = tableHTML;
+            document.getElementById('reportCard').style.display = "block";
+        } else {
+            alert("Record not found for: " + name);
         }
-    </script>
+    }
+</script>
 </body>
-    </html>
+        </html>
