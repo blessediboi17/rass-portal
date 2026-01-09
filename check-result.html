@@ -1,128 +1,124 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>RASS | View Report Card</title>
+    <meta charset="UTF-8">
+    <title>RASS | Official Academic Report</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: 'Times New Roman', serif; background: #f0f2f5; padding: 20px; }
-        .container { max-width: 900px; margin: auto; background: white; padding: 40px; border: 1px solid #ccc; }
+        body { font-family: 'Times New Roman', Times, serif; background: #f4f4f4; padding: 20px; }
+        .container { max-width: 900px; margin: auto; background: white; padding: 40px; border: 1px solid #ccc; position: relative; }
+        .header { text-align: center; border-bottom: 4px double #003366; margin-bottom: 20px; padding-bottom: 10px; }
+        .logo { width: 90px; }
+        .school-name { font-size: 28px; font-weight: bold; color: #003366; margin: 5px 0; }
+        .address { font-size: 14px; color: #333; line-height: 1.4; }
         
-        /* Letterhead Styling */
-        .letterhead { text-align: center; border-bottom: 3px double #003366; margin-bottom: 20px; }
-        .logo { width: 100px; }
-        .school-name { color: #003366; font-size: 28px; font-weight: bold; margin: 5px 0; }
-        
-        /* Search Box (Hidden during Print) */
-        .no-print { text-align: center; background: #eef2f7; padding: 20px; border-radius: 8px; margin-bottom: 30px; border: 1px solid #ccc; }
-        input { padding: 12px; width: 300px; border: 1px solid #999; border-radius: 4px; }
-        .btn { background: #003366; color: white; padding: 12px 25px; border: none; cursor: pointer; font-weight: bold; border-radius: 4px; }
-
-        /* Table */
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #000; padding: 8px; text-align: center; }
+        .student-info { display: flex; justify-content: space-between; margin: 20px 0; font-weight: bold; border-bottom: 1px solid #000; padding-bottom: 5px; }
+        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+        th, td { border: 1px solid #000; padding: 8px; text-align: center; font-size: 14px; }
         th { background: #f2f2f2; }
         .failing { color: red !important; font-weight: bold; }
         
-        /* Footer */
-        .footer-area { display: flex; justify-content: space-between; margin-top: 60px; }
-        .sig-box { border-top: 2px solid #000; width: 200px; text-align: center; padding-top: 5px; }
-        .stamp-circle { border: 2px dashed #ccc; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 10px; text-align: center; }
+        .remarks { margin-top: 20px; border: 1px solid #000; padding: 10px; min-height: 60px; }
+        .footer { display: flex; justify-content: space-between; margin-top: 60px; }
+        .sig-line { border-top: 2px solid #000; width: 220px; text-align: center; padding-top: 5px; font-weight: bold; }
+        .stamp-area { border: 2px dashed #ccc; width: 120px; height: 120px; border-radius: 50%; display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 11px; text-align: center; }
 
         @media print {
             .no-print { display: none !important; }
             body { background: white; padding: 0; }
-            .container { border: none; width: 100%; }
+            .container { border: none; width: 100%; max-width: 100%; }
         }
     </style>
 </head>
 <body>
 
-<div class="no-print">
-    <h3>Royal Academy Result Portal</h3>
-    <input type="text" id="studentSearch" placeholder="Enter Student's Full Name">
-    <button class="btn" onclick="searchGrades()">View Result</button>
+<div class="no-print" style="text-align:center; margin-bottom: 20px;">
+    <input type="text" id="searchInput" placeholder="Enter Full Name" style="padding: 10px; width: 250px;">
+    <button onclick="fetchRecord()" style="padding: 10px 20px; background: #003366; color: white; border: none; border-radius: 4px; cursor: pointer;">View Result</button>
 </div>
 
-<div id="reportCard" class="container" style="display:none;">
-    <div class="letterhead">
+<div id="report-card" class="container" style="display:none;">
+    <div class="header">
         <img src="IMG_20260107_084912.jpg" class="logo">
         <div class="school-name">ROYAL ACADEMY SCHOOL SYSTEM</div>
-        <div style="font-size: 14px;">
+        <div class="address">
             Nursery, Kindergarten & Elementary<br>
             New Life Community, Lower Johnsonville, Liberia<br>
             <i>"Quality Education for a Brighter Future"</i>
         </div>
     </div>
 
-    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-bottom: 15px;">
-        <span>NAME: <span id="dispName" style="color:#003366"></span></span>
-        <span>CLASS: <span id="dispClass" style="color:#003366"></span></span>
-        <span>YEAR: <span id="dispYear" style="color:#003366"></span></span>
+    <div class="student-info">
+        <span>NAME: <span id="outName" style="color:#003366"></span></span>
+        <span>CLASS: <span id="outClass" style="color:#003366"></span></span>
+        <span>YEAR: <span id="outYear" style="color:#003366"></span></span>
     </div>
 
     <table>
         <thead>
             <tr>
-                <th>Subject</th><th>1st</th><th>2nd</th><th>3rd</th><th>Ex 1</th>
-                <th>4th</th><th>5th</th><th>6th</th><th>Final</th><th>AVG</th>
+                <th style="text-align:left;">Subject</th>
+                <th>1st</th><th>2nd</th><th>3rd</th><th>Ex 1</th>
+                <th>4th</th><th>5th</th><th>6th</th><th>Final</th>
+                <th>AVG</th>
             </tr>
         </thead>
-        <tbody id="resultBody"></tbody>
+        <tbody id="outTable"></tbody>
     </table>
 
-    <div style="margin-top: 20px; border: 1px solid #000; padding: 10px;">
+    <div class="remarks">
         <strong>TEACHER'S REMARKS:</strong>
-        <p id="dispRemarks" style="font-style: italic; margin: 5px 0;"></p>
+        <p id="outRemarks" style="margin: 5px 0; font-style: italic;"></p>
     </div>
 
-    <div class="footer-area">
-        <div class="stamp-circle">OFFICIAL<br>SCHOOL STAMP</div>
-        <div class="sig-box">Principal's Signature</div>
+    <div class="footer">
+        <div class="stamp-area">PLACE OFFICIAL<br>SCHOOL STAMP<br>HERE</div>
+        <div class="sig-line">Principal's Signature</div>
     </div>
 
-    <button class="btn no-print" onclick="window.print()" style="width: 100%; margin-top: 20px; background: #28a745;">PRINT / SAVE AS PDF</button>
+    <button class="no-print" onclick="window.print()" style="width:100%; margin-top:30px; padding:15px; background:#28a745; color:white; border:none; border-radius:8px; font-weight:bold; cursor:pointer;">PRINT / SAVE AS PDF</button>
 </div>
 
 <script>
-    // Supabase Setup
     const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
 
-    async function searchGrades() {
-        const name = document.getElementById('studentSearch').value;
-        const { data, error } = await _sb
-            .from('grades')
-            .select('*')
-            .ilike('student_name', name)
-            .limit(1);
+    // AUTO-SEARCH LOGIC
+    window.onload = function() {
+        const urlParams = new URLSearchParams(window.location.search);
+        const nameParam = urlParams.get('name');
+        if (nameParam) {
+            document.getElementById('searchInput').value = nameParam;
+            fetchRecord();
+        }
+    }
+
+    async function fetchRecord() {
+        const name = document.getElementById('searchInput').value.trim();
+        const { data } = await _sb.from('grades').select('*').ilike('student_name', name).limit(1);
 
         if (data && data.length > 0) {
-            const student = data[0];
-            document.getElementById('dispName').innerText = student.student_name.toUpperCase();
-            document.getElementById('dispClass').innerText = student.student_class;
-            document.getElementById('dispYear').innerText = student.academic_year;
-            document.getElementById('dispRemarks').innerText = student.teacher_remarks || "No comments.";
+            const res = data[0];
+            document.getElementById('outName').innerText = res.student_name.toUpperCase();
+            document.getElementById('outClass').innerText = res.student_class;
+            document.getElementById('outYear').innerText = res.academic_year;
+            document.getElementById('outRemarks').innerText = res.teacher_remarks || "No comments provided.";
             
-            let tableHTML = "";
-            for (let sub in student.scores) {
-                let subSum = 0;
-                let row = `<tr><td style="text-align:left; font-weight:bold;">${sub.toUpperCase()}</td>`;
-                const periods = ["p1", "p2", "p3", "ex1", "p4", "p5", "p6", "ex2"];
-                
-                periods.forEach(p => {
-                    let score = parseFloat(student.scores[sub][p]) || 0;
-                    subSum += score;
-                    row += `<td class="${(score < 75 && score > 0) ? 'failing' : ''}">${score || '-'}</td>`;
+            let html = "";
+            for (let s in res.scores) {
+                let sum = 0;
+                let row = `<tr><td style="text-align:left; font-weight:bold;">${s.toUpperCase()}</td>`;
+                ["p1","p2","p3","ex1","p4","p5","p6","ex2"].forEach(p => {
+                    let v = parseFloat(res.scores[s][p]) || 0;
+                    sum += v;
+                    row += `<td class="${(v < 75 && v > 0) ? 'failing' : ''}">${v || '-'}</td>`;
                 });
-                
-                row += `<td style="background:#f9f9f9; font-weight:bold;">${(subSum / 8).toFixed(1)}</td></tr>`;
-                tableHTML += row;
+                row += `<td style="background:#f9f9f9;"><b>${(sum/8).toFixed(1)}</b></td></tr>`;
+                html += row;
             }
-            document.getElementById('resultBody').innerHTML = tableHTML;
-            document.getElementById('reportCard').style.display = "block";
-        } else {
-            alert("Record not found for: " + name);
-        }
+            document.getElementById('outTable').innerHTML = html;
+            document.getElementById('report-card').style.display = "block";
+        } else { alert("No record found."); }
     }
 </script>
 </body>
-        </html>
+            </html>
