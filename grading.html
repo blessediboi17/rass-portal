@@ -1,138 +1,45 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>RASS | Teacher Grading Portal</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 20px; }
-        .box { max-width: 1100px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 3px solid #003366; margin-bottom: 25px; }
-        .info-row { display: flex; gap: 20px; margin-bottom: 20px; }
-        .field { flex: 1; text-align: left; }
-        label { font-weight: bold; color: #003366; }
-        input, select, textarea { width: 100%; padding: 12px; margin-top: 5px; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; font-size: 13px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background: #003366; color: white; }
-        .fail { color: red !important; border: 2px solid red !important; font-weight: bold; }
-        .save-btn { background: #003366; color: white; padding: 18px; width: 100%; border: none; font-weight: bold; cursor: pointer; margin-top: 20px; border-radius: 8px; font-size: 18px; }
-        #view-btn { display: none; background: #28a745; color: white; padding: 15px; width: 100%; border: none; font-weight: bold; cursor: pointer; margin-top: 10px; border-radius: 8px; text-decoration: none; text-align: center; font-size: 16px; }
-    </style>
-</head>
-<body>
+<div id="login-section" style="background: #eef2f7; padding: 20px; border-radius: 8px; margin-bottom: 20px; text-align: center;">
+    <h3>Teacher Login</h3>
+    <p>Please enter your Teacher Access Code to manage your students.</p>
+    <input type="password" id="teacher-code" placeholder="Enter Teacher ID" style="width: 200px; margin-right: 10px;">
+    <button class="btn" onclick="loginTeacher()" style="width: auto; padding: 10px 20px;">Load My Students</button>
+</div>
 
-<div class="box">
-    <div class="header">
-        <h2 style="color:#003366; margin:5px;">Royal Academy School System</h2>
-        <p>Teacher Grading Entry Portal</p>
-    </div>
-    
-    <div class="info-row">
-        <div class="field">
-            <label>Student Full Name</label>
-            <input type="text" id="s_name" placeholder="Enter Full Name">
-        </div>
-        <div class="field">
-            <label>Class / Section</label>
-            <select id="s_class">
-                <option value="ABC">ABC</option>
-                <option value="K1">K1</option>
-                <option value="K2">K2</option>
-                <option value="Grade 1">Grade 1</option>
-                <option value="Grade 2">Grade 2</option>
-                <option value="Grade 3">Grade 3</option>
-                <option value="Grade 4">Grade 4</option>
-                <option value="Grade 5">Grade 5</option>
-            </select>
-        </div>
-        <div class="field">
-            <label>Academic Year</label>
-            <input type="text" id="s_year" value="2025-2026">
-        </div>
-    </div>
-
-    <table>
-        <thead>
-            <tr>
-                <th style="text-align:left;">Subject</th>
-                <th>1st</th><th>2nd</th><th>3rd</th><th>Ex 1</th>
-                <th>4th</th><th>5th</th><th>6th</th><th>Final</th>
-            </tr>
-        </thead>
-        <tbody id="table-rows"></tbody>
-    </table>
-
-    <div style="margin-top:20px;">
-        <label>Teacher's Remarks / Comments</label>
-        <textarea id="s_remarks" rows="3" placeholder="Enter behavioral or academic comments..."></textarea>
-    </div>
-
-    <div id="msg" style="text-align:center; font-weight:bold; margin-top:15px; font-size:18px;"></div>
-    
-    <button class="save-btn" onclick="saveData()">SAVE STUDENT RECORD</button>
-    <a id="view-btn" href="#">VIEW & PRINT OFFICIAL REPORT CARD</a>
+<div id="main-portal" style="display:none;">
+    <h4 id="welcome-msg"></h4>
+    ...
 </div>
 
 <script>
-    const subs = ["Math", "English", "General Science", "Health Science", "Bible", "Spelling", "Social Studies", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Learning Skills"];
-    const pers = ["p1", "p2", "p3", "ex1", "p4", "p5", "p6", "ex2"];
-    const tBody = document.getElementById('table-rows');
+let currentTeacherID = "";
 
-    subs.forEach(s => {
-        let r = `<tr><td style="text-align:left; font-weight:bold;">${s}</td>`;
-        pers.forEach(p => {
-            let id = `${s.replace(/\s+/g, '').toLowerCase()}_${p}`;
-            r += `<td><input type="number" id="${id}" oninput="check(this)" style="width:50px; text-align:center;"></td>`;
-        });
-        r += `</tr>`;
-        tBody.innerHTML += r;
-    });
-
-    function check(i) {
-        if (i.value !== "" && parseFloat(i.value) < 75) i.classList.add('fail');
-        else i.classList.remove('fail');
+function loginTeacher() {
+    const code = document.getElementById('teacher-code').value;
+    if (code.length < 3) {
+        alert("Please enter a valid Teacher ID");
+        return;
     }
+    currentTeacherID = code;
+    document.getElementById('login-section').style.display = "none";
+    document.getElementById('main-portal').style.display = "block";
+    document.getElementById('welcome-msg').innerText = "Logged in as Teacher: " + currentTeacherID;
+}
 
-    const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
+// UPDATE YOUR SAVE FUNCTION TO INCLUDE THE TEACHER ID
+async function saveData() {
+    const n = document.getElementById('s_name').value.trim();
+    const c = document.getElementById('s_class').value;
+    // ... (rest of your variables)
 
-    async function saveData() {
-        const n = document.getElementById('s_name').value.trim();
-        const c = document.getElementById('s_class').value;
-        const y = document.getElementById('s_year').value;
-        const rem = document.getElementById('s_remarks').value;
-        const msg = document.getElementById('msg');
-        const viewBtn = document.getElementById('view-btn');
-
-        if(!n) { alert("Please enter Student Name"); return; }
-        msg.innerHTML = "Saving to Database...";
-
-        let scores = {};
-        subs.forEach(s => {
-            let sk = s.replace(/\s+/g, '').toLowerCase();
-            scores[sk] = {};
-            pers.forEach(p => { 
-                scores[sk][p] = document.getElementById(`${sk}_${p}`).value || 0; 
-            });
-        });
-
-        const { error } = await _sb.from('grades').insert([{ 
-            student_name: n, 
-            academic_year: y, 
-            student_class: c, 
-            teacher_remarks: rem, 
-            scores: scores 
-        }]);
-
-        if (error) {
-            msg.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
-        } else {
-            msg.innerHTML = `<span style="color:green;">✅ Saved Successfully!</span>`;
-            viewBtn.style.display = "block";
-            viewBtn.href = `check-result.html?name=${encodeURIComponent(n)}`;
-            window.scrollTo(0, document.body.scrollHeight);
-        }
-    }
+    const { error } = await _sb.from('grades').insert([{ 
+        student_name: n, 
+        academic_year: y, 
+        student_class: c, 
+        teacher_remarks: rem, 
+        scores: scores,
+        teacher_id: currentTeacherID // THIS LINKS THE STUDENT TO THIS TEACHER
+    }]);
+    
+    // ... (rest of your success logic)
+}
 </script>
-</body>
-    </html>
