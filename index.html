@@ -1,161 +1,23 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASS | Annual Grading Portal</title>
+    <title>RASS Portal | Home</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background-color: #f0f2f5; margin: 0; padding: 10px; }
-        .container { max-width: 1100px; margin: auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .header { text-align: center; border-bottom: 2px solid #003366; margin-bottom: 20px; }
-        .logo { width: 80px; }
-        h1 { color: #003366; font-size: 22px; margin: 5px 0; }
-        
-        /* Table Layout */
-        .table-wrapper { overflow-x: auto; margin-top: 20px; }
-        table { width: 100%; border-collapse: collapse; font-size: 13px; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: center; }
-        th { background-color: #003366; color: white; white-space: nowrap; }
-        
-        /* Input Styling */
-        input[type="number"] { width: 55px; padding: 6px; border: 1px solid #ccc; border-radius: 4px; text-align: center; }
-        input[type="text"] { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 4px; box-sizing: border-box; }
-        
-        /* Red for Failure Logic */
-        input.failing {
-            color: #d00000 !important;
-            border: 2px solid #d00000 !important;
-            font-weight: bold;
-            background-color: #fffafa;
-        }
-
-        .student-info { display: flex; gap: 20px; flex-wrap: wrap; margin-bottom: 20px; }
-        .info-box { flex: 1; min-width: 250px; }
-        
-        .btn-group { display: flex; gap: 10px; margin-top: 25px; }
-        .btn { background: #003366; color: white; padding: 14px 25px; border: none; border-radius: 6px; cursor: pointer; font-size: 16px; flex: 1; font-weight: bold; }
-        .btn-reset { background: #666; }
-        #status { margin-top: 20px; font-weight: bold; text-align: center; font-size: 16px; }
+        body { font-family: sans-serif; text-align: center; background: #003366; color: white; padding-top: 100px; }
+        .choice-card { background: white; color: #333; padding: 40px; border-radius: 15px; display: inline-block; width: 300px; }
+        .btn { display: block; padding: 15px; margin: 10px 0; text-decoration: none; border-radius: 8px; font-weight: bold; color: white; }
+        .teacher-btn { background: #003366; }
+        .student-btn { background: #28a745; }
     </style>
 </head>
 <body>
-
-    <div class="container">
-        <div class="header">
-            <img src="IMG_20260107_084912.jpg" alt="RASS Logo" class="logo">
-            <h1>Royal Academy School System</h1>
-            <p>Teacher's Grade Entry Portal</p>
-        </div>
-
-        <div class="student-info">
-            <div class="info-box">
-                <label><b>Student Name:</b></label>
-                <input type="text" id="student-name" placeholder="Enter Full Name">
-            </div>
-            <div class="info-box">
-                <label><b>Academic Year:</b></label>
-                <select id="academic-year" style="width: 100%; padding: 10px; border-radius: 4px; border: 1px solid #ccc;">
-                    <option value="2025-2026">2025-2026</option>
-                    <option value="2026-2027">2026-2027</option>
-                </select>
-            </div>
-        </div>
-
-        <div class="table-wrapper">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Subject</th>
-                        <th>1st Per</th>
-                        <th>2nd Per</th>
-                        <th>3rd Per</th>
-                        <th>Sem 1 Exam</th>
-                        <th>4th Per</th>
-                        <th>5th Per</th>
-                        <th>6th Per</th>
-                        <th>Final Exam</th>
-                    </tr>
-                </thead>
-                <tbody id="subject-rows">
-                    </tbody>
-            </table>
-        </div>
-
-        <div id="status"></div>
-
-        <div class="btn-group">
-            <button class="btn" onclick="submitGrades()">Save Full Year Record</button>
-            <button class="btn btn-reset" onclick="location.reload()">Clear / New Student</button>
-        </div>
+    <div class="choice-card">
+        <h2>RASS Portal</h2>
+        <p>Select your portal:</p>
+        
+        <a href="dashboard.html" class="btn teacher-btn">TEACHER PORTAL</a>
+        
+        <a href="check-result.html" class="btn student-btn">VIEW REPORT CARD</a>
     </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script>
-        const subjects = ["Math", "English", "General Science", "Health Science", "Bible", "Spelling", "Social Studies", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Learning Skills"];
-        const periods = ["p1", "p2", "p3", "sem1_exam", "p4", "p5", "p6", "final_exam"];
-        
-        const tableBody = document.getElementById('subject-rows');
-        
-        // Generate rows and attach the Red-Failure check
-        subjects.forEach(sub => {
-            let row = `<tr><td style="text-align:left; font-weight:bold;">${sub}</td>`;
-            periods.forEach(p => {
-                const inputId = `${sub.replace(/\s+/g, '').toLowerCase()}_${p}`;
-                row += `<td><input type="number" id="${inputId}" placeholder="-" oninput="checkGrade(this)"></td>`;
-            });
-            row += `</tr>`;
-            tableBody.innerHTML += row;
-        });
-
-        // Function: Turns text RED if score is below 75
-        function checkGrade(input) {
-            const val = parseFloat(input.value);
-            if (input.value !== "" && val < 75) {
-                input.classList.add('failing');
-            } else {
-                input.classList.remove('failing');
-            }
-        }
-
-        // SUPABASE CONNECTION
-        const supabaseUrl = 'https://thhrfrxvaxezcoutpzby.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI';
-        const _supabase = supabase.createClient(supabaseUrl, supabaseKey);
-
-        async function submitGrades() {
-            const name = document.getElementById('student-name').value.trim();
-            const year = document.getElementById('academic-year').value;
-            const statusBox = document.getElementById('status');
-            
-            if(!name) { alert("Please enter student name"); return; }
-            statusBox.innerHTML = "Saving to RASS Database...";
-
-            const fullRecord = {};
-            subjects.forEach(sub => {
-                const subKey = sub.replace(/\s+/g, '').toLowerCase();
-                fullRecord[subKey] = {};
-                periods.forEach(p => {
-                    const val = document.getElementById(`${subKey}_${p}`).value;
-                    fullRecord[subKey][p] = val || 0;
-                });
-            });
-
-            // Uses updated column names: student_name, academic_year, scores
-            const { data, error } = await _supabase
-                .from('grades')
-                .insert([{ 
-                    student_name: name, 
-                    academic_year: year,
-                    scores: fullRecord 
-                }]);
-
-            if (error) {
-                statusBox.innerHTML = `<span style="color:red;">Error: ${error.message}</span>`;
-            } else {
-                statusBox.innerHTML = `<span style="color:green;">✅ Success! ${name}'s grades were saved.</span>`;
-                window.scrollTo(0,0);
-            }
-        }
-    </script>
 </body>
     </html>
