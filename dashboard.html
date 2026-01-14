@@ -8,75 +8,71 @@
         body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
         .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
         .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003366; padding-bottom: 10px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
         th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
         th { background: #003366; color: white; }
-        .btn { padding: 8px 15px; border: none; border-radius: 4px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 13px; }
-        .btn-add { background: #28a745; color: white; padding: 12px 20px; }
-        .btn-view { background: #003366; color: white; margin-right: 5px; }
+        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 13px; display: inline-block; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-view { background: #003366; color: white; }
+        .btn-del { background: #dc3545; color: white; }
         .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #003366; display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-box { background: white; padding: 40px; border-radius: 10px; text-align: center; }
+        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 350px; }
+        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
     </style>
 </head>
 <body>
 
 <div id="login-overlay" class="login-overlay">
     <div class="login-box">
-        <h2>Teacher Access</h2>
-        <p>Enter your unique Teacher ID (e.g., TEACHER1)</p>
-        <input type="text" id="teacher-id-input" style="padding:10px; width:200px; border:1px solid #ccc; border-radius:5px;"><br><br>
-        <button class="btn btn-add" onclick="login()">Enter Dashboard</button>
+        <h2 style="color:#003366">Teacher Login</h2>
+        <p>Enter your unique ID to manage your students.</p>
+        <input type="text" id="teacher-id-input" placeholder="e.g. GRADE1-ABC">
+        <button class="btn btn-add" style="width:100%" onclick="login()">Enter Dashboard</button>
     </div>
 </div>
 
 <div class="container">
     <div class="header">
         <div>
-            <h1 style="margin:0; color:#003366;">Teacher Dashboard</h1>
-            <p id="teacher-display" style="margin:5px 0; font-weight:bold;"></p>
+            <h1 style="margin:0; color:#003366;">Royal Academy Dashboard</h1>
+            <p id="teacher-display" style="margin:5px 0; color: #666;"></p>
         </div>
-        <a href="grading.html" id="add-link" class="btn btn-add">+ Add New Student</a>
+        <a href="#" id="add-link" class="btn btn-add" onclick="goToGrading()">+ Add New Student</a>
     </div>
 
-    <h3>My Assigned Students</h3>
     <table>
         <thead>
             <tr>
                 <th>Student Name</th>
                 <th>Class</th>
-                <th>Academic Year</th>
+                <th>Year</th>
                 <th>Actions</th>
             </tr>
         </thead>
-        <tbody id="student-list">
-            </tbody>
+        <tbody id="student-list"></tbody>
     </table>
 </div>
 
 <script>
     const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
-
+    
     let currentTeacher = "";
 
     function login() {
         const id = document.getElementById('teacher-id-input').value.trim();
-        if(!id) return alert("Enter ID");
+        if(!id) return alert("Please enter your Teacher ID");
         currentTeacher = id;
         document.getElementById('login-overlay').style.display = "none";
-        document.getElementById('teacher-display').innerText = "Logged in: " + currentTeacher;
-        
-        // Update the "Add New" link to remember who is adding the student
-        document.getElementById('add-link').href = `grading.html?tid=${currentTeacher}`;
-        
+        document.getElementById('teacher-display').innerText = "Assigned Students for: " + currentTeacher;
         loadStudents();
     }
 
-    async function loadStudents() {
-        const { data, error } = await _sb
-            .from('grades')
-            .select('*')
-            .eq('teacher_id', currentTeacher); // THIS IS THE SECURITY FILTER
+    function goToGrading() {
+        window.location.href = `grading.html?tid=${encodeURIComponent(currentTeacher)}`;
+    }
 
+    async function loadStudents() {
+        const { data, error } = await _sb.from('grades').select('*').eq('teacher_id', currentTeacher);
         const list = document.getElementById('student-list');
         list.innerHTML = "";
 
@@ -84,19 +80,27 @@
             data.forEach(s => {
                 list.innerHTML += `
                     <tr>
-                        <td>${s.student_name}</td>
+                        <td><b>${s.student_name}</b></td>
                         <td>${s.student_class}</td>
                         <td>${s.academic_year}</td>
                         <td>
-                            <a href="check-result.html?name=${encodeURIComponent(s.student_name)}" class="btn btn-view">View Report</a>
+                            <a href="check-result.html?name=${encodeURIComponent(s.student_name)}" class="btn btn-view">View</a>
+                            <button onclick="deleteStudent('${s.student_name}', ${s.id})" class="btn btn-del">Delete</button>
                         </td>
-                    </tr>
-                `;
+                    </tr>`;
             });
         } else {
-            list.innerHTML = "<tr><td colspan='4'>No students found assigned to your ID.</td></tr>";
+            list.innerHTML = "<tr><td colspan='4'>No students found. Click '+ Add New' to start.</td></tr>";
+        }
+    }
+
+    async function deleteStudent(name, id) {
+        if (confirm(`Delete record for ${name}? This cannot be undone.`)) {
+            const { error } = await _sb.from('grades').delete().eq('id', id).eq('teacher_id', currentTeacher);
+            if (error) alert(error.message);
+            else loadStudents();
         }
     }
 </script>
 </body>
-</html>
+            </html>
