@@ -3,26 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Grade Entry</title>
+    <title>Grade Entry | RASS</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
         .box { background: white; padding: 15px; border-radius: 12px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
-        label { font-size: 12px; font-weight: bold; color: #003366; }
-        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 15px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
+        label { font-size: 11px; font-weight: bold; color: #003366; }
+        input, select, textarea { width: 100%; padding: 12px; margin: 5px 0 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
         .scroll-container { overflow-x: auto; border: 1px solid #eee; border-radius: 8px; }
-        table { width: 650px; border-collapse: collapse; }
-        th, td { border: 1px solid #eee; padding: 8px; text-align: center; font-size: 11px; }
+        table { width: 900px; border-collapse: collapse; }
+        th, td { border: 1px solid #eee; padding: 6px; text-align: center; font-size: 11px; }
         th { background: #003366; color: white; }
+        .avg-col { background: #eef2ff; font-weight: bold; color: #003366; }
+        .period-avg-row { background: #003366; color: white; font-weight: bold; }
         .btn-save { background: #003366; color: white; padding: 18px; width: 100%; border: none; border-radius: 12px; font-weight: bold; font-size: 16px; margin-top: 15px; }
-        .fail { background: #ffebee !important; color: red !important; border: 1px solid red !important; }
+        .fail { color: red !important; font-weight: bold; }
     </style>
 </head>
 <body>
 
 <div class="box">
-    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-        <h3 style="margin:0; color:#003366;">New Record</h3>
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <h3 style="margin:0; color:#003366;">Grading Record</h3>
         <a href="dashboard.html" style="font-size:13px; text-decoration:none; font-weight:bold; color:#666;">← Back</a>
     </div>
 
@@ -36,59 +38,120 @@
         <option>Grade 4</option><option>Grade 5</option>
     </select>
 
-    <label>ACADEMIC YEAR</label>
-    <input type="text" id="s_year" value="2025-2026">
-
-    <label>GRADES (Swipe right to see all periods →)</label>
     <div class="scroll-container">
         <table>
             <thead>
-                <tr><th>Subject</th><th>1st</th><th>2nd</th><th>3rd</th><th>Ex1</th><th>4th</th><th>5th</th><th>6th</th><th>Fin</th></tr>
+                <tr>
+                    <th style="text-align:left;">Subject</th>
+                    <th>1st</th><th>2nd</th><th>3rd</th><th>Ex1</th>
+                    <th class="avg-col">S1 Avg</th>
+                    <th>4th</th><th>5th</th><th>6th</th><th>Ex2</th>
+                    <th class="avg-col">S2 Avg</th>
+                </tr>
             </thead>
             <tbody id="rows"></tbody>
+            <tfoot>
+                <tr class="period-avg-row">
+                    <td style="text-align:left;">PERIOD AVG</td>
+                    <td id="avg_p1">0</td><td id="avg_p2">0</td><td id="avg_p3">0</td><td id="avg_ex1">0</td>
+                    <td style="background:#002244;">-</td>
+                    <td id="avg_p4">0</td><td id="avg_p5">0</td><td id="avg_p6">0</td><td id="avg_ex2">0</td>
+                    <td style="background:#002244;">-</td>
+                </tr>
+            </tfoot>
         </table>
     </div>
 
     <label style="display:block; margin-top:15px;">TEACHER'S REMARKS</label>
-    <textarea id="s_remarks" placeholder="Enter comments here..."></textarea>
+    <textarea id="s_remarks" rows="2"></textarea>
     
-    <button class="btn-save" onclick="save()">SAVE TO DATABASE</button>
+    <button class="btn-save" onclick="save()">SAVE RECORD</button>
 </div>
 
 <script>
     const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
-    const tid = new URLSearchParams(window.location.search).get('tid');
+    const params = new URLSearchParams(window.location.search);
+    const tid = params.get('tid');
+    const editId = params.get('edit');
+
     const subs = ["Math", "English", "Science", "Health", "Bible", "Spelling", "Social", "Reading", "Drawing", "Phonics", "Writing", "P.E.", "Skills"];
-    const pers = ["p1", "p2", "p3", "ex1", "p4", "p5", "p6", "ex2"];
+    const all_pers = ["p1", "p2", "p3", "ex1", "p4", "p5", "p6", "ex2"];
 
     subs.forEach(s => {
-        let row = `<tr><td style="text-align:left; font-weight:bold; background:#f9f9f9;">${s}</td>`;
-        pers.forEach(p => {
-            let id = `${s.toLowerCase().replace(/\s/g, '')}_${p}`;
-            row += `<td><input type="number" id="${id}" style="width:40px; border:1px solid #eee; text-align:center; padding:5px; border-radius:4px;" oninput="this.className=(this.value < 75 && this.value != '') ? 'fail' : ''"></td>`;
+        let slug = s.toLowerCase().replace(/\s/g, '');
+        let r = `<tr><td style="text-align:left; font-weight:bold; background:#f9f9f9;">${s}</td>`;
+        all_pers.forEach((p, idx) => {
+            r += `<td><input type="number" id="${slug}_${p}" class="grade-input" data-sub="${slug}" data-per="${p}" style="width:38px; text-align:center;"></td>`;
+            if(idx === 3) r += `<td id="${slug}_s1avg" class="avg-col">0</td>`;
+            if(idx === 7) r += `<td id="${slug}_s2avg" class="avg-col">0</td>`;
         });
-        document.getElementById('rows').innerHTML += row + `</tr>`;
+        document.getElementById('rows').innerHTML += r + `</tr>`;
     });
+
+    document.addEventListener('input', (e) => {
+        if(e.target.classList.contains('grade-input')) {
+            const sub = e.target.dataset.sub;
+            const per = e.target.dataset.per;
+            calcSubjectSemAvg(sub);
+            calcPeriodVerticalAvg(per);
+            if(e.target.value != '' && e.target.value < 75) e.target.classList.add('fail');
+            else e.target.classList.remove('fail');
+        }
+    });
+
+    function calcSubjectSemAvg(sub) {
+        let s1 = ["p1","p2","p3","ex1"], s2 = ["p4","p5","p6","ex2"];
+        const run = (list, target) => {
+            let sum = 0, count = 0;
+            list.forEach(p => {
+                let v = parseFloat(document.getElementById(`${sub}_${p}`).value);
+                if(v > 0) { sum += v; count++; }
+            });
+            document.getElementById(`${sub}_${target}`).innerText = count > 0 ? (sum/count).toFixed(0) : 0;
+        };
+        run(s1, "s1avg"); run(s2, "s2avg");
+    }
+
+    function calcPeriodVerticalAvg(per) {
+        let sum = 0, count = 0;
+        subs.forEach(s => {
+            let slug = s.toLowerCase().replace(/\s/g, '');
+            let v = parseFloat(document.getElementById(`${slug}_${per}`).value);
+            if(v > 0) { sum += v; count++; }
+        });
+        document.getElementById(`avg_${per}`).innerText = count > 0 ? (sum/count).toFixed(1) : 0;
+    }
+
+    if(editId) {
+        (async () => {
+            const { data } = await _sb.from('grades').select('*').eq('id', editId).single();
+            if(data) {
+                document.getElementById('s_name').value = data.student_name;
+                document.getElementById('s_class').value = data.student_class;
+                document.getElementById('s_remarks').value = data.teacher_remarks;
+                for(let s in data.scores) {
+                    for(let p in data.scores[s]) {
+                        let el = document.getElementById(`${s}_${p}`);
+                        if(el) { el.value = data.scores[s][p]; calcPeriodVerticalAvg(p); }
+                    }
+                    calcSubjectSemAvg(s);
+                }
+            }
+        })();
+    }
 
     async function save() {
         const name = document.getElementById('s_name').value.trim();
-        if(!name || !tid) return alert("Please enter Student Name");
-
+        if(!name || !tid) return alert("Enter Name/ID");
         let scores = {};
         subs.forEach(s => {
             let k = s.toLowerCase().replace(/\s/g, ''); scores[k] = {};
-            pers.forEach(p => scores[k][p] = document.getElementById(`${k}_${p}`).value || 0);
+            all_pers.forEach(p => scores[k][p] = document.getElementById(`${k}_${p}`).value || 0);
         });
-
-        const { error } = await _sb.from('grades').insert([{ 
-            student_name: name, student_class: document.getElementById('s_class').value,
-            academic_year: document.getElementById('s_year').value, teacher_remarks: document.getElementById('s_remarks').value,
-            scores: scores, teacher_id: tid 
-        }]);
-
-        if(error) alert("Error: " + error.message);
-        else { alert("Student Record Saved!"); window.location.href="dashboard.html"; }
+        const payload = { student_name: name, student_class: document.getElementById('s_class').value, academic_year: "2025-2026", teacher_remarks: document.getElementById('s_remarks').value, scores: scores, teacher_id: tid };
+        const { error } = editId ? await _sb.from('grades').update(payload).eq('id', editId) : await _sb.from('grades').insert([payload]);
+        if(error) alert(error.message); else { alert("Saved!"); window.location.href="dashboard.html"; }
     }
 </script>
 </body>
-        </html>
+                                                                           </html>
