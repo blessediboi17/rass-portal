@@ -1,106 +1,42 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <title>RASS | Teacher Dashboard</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>Dashboard Test</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; margin: 0; padding: 20px; }
-        .container { max-width: 1000px; margin: auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
-        .header { display: flex; justify-content: space-between; align-items: center; border-bottom: 3px solid #003366; padding-bottom: 10px; margin-bottom: 20px; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
-        th { background: #003366; color: white; }
-        .btn { padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-decoration: none; font-size: 13px; display: inline-block; }
-        .btn-add { background: #28a745; color: white; }
-        .btn-view { background: #003366; color: white; }
-        .btn-del { background: #dc3545; color: white; }
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #003366; display: flex; align-items: center; justify-content: center; z-index: 1000; }
-        .login-box { background: white; padding: 40px; border-radius: 12px; text-align: center; width: 350px; }
-        input[type="text"] { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 6px; box-sizing: border-box; }
+        /* This RED box should cover the whole screen when you open the page */
+        #login-overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: red; /* Bright Red for testing */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        .login-box { background: white; padding: 50px; border-radius: 20px; text-align: center; }
     </style>
 </head>
 <body>
 
-<div id="login-overlay" class="login-overlay">
-    <div class="login-box">
-        <h2 style="color:#003366">Teacher Login</h2>
-        <p>Enter your unique ID to manage your students.</p>
-        <input type="text" id="teacher-id-input" placeholder="e.g. GRADE1-ABC">
-        <button class="btn btn-add" style="width:100%" onclick="login()">Enter Dashboard</button>
-    </div>
-</div>
-
-<div class="container">
-    <div class="header">
-        <div>
-            <h1 style="margin:0; color:#003366;">Royal Academy Dashboard</h1>
-            <p id="teacher-display" style="margin:5px 0; color: #666;"></p>
+    <div id="login-overlay">
+        <div class="login-box">
+            <h1>TEACHER LOGIN</h1>
+            <input type="text" id="tid" placeholder="Enter Teacher ID">
+            <button onclick="enter()">Login</button>
         </div>
-        <a href="#" id="add-link" class="btn btn-add" onclick="goToGrading()">+ Add New Student</a>
     </div>
 
-    <table>
-        <thead>
-            <tr>
-                <th>Student Name</th>
-                <th>Class</th>
-                <th>Year</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody id="student-list"></tbody>
-    </table>
-</div>
+    <h1>If you see this text, the login failed to cover the screen!</h1>
 
-<script>
-    const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
-    
-    let currentTeacher = "";
-
-    function login() {
-        const id = document.getElementById('teacher-id-input').value.trim();
-        if(!id) return alert("Please enter your Teacher ID");
-        currentTeacher = id;
-        document.getElementById('login-overlay').style.display = "none";
-        document.getElementById('teacher-display').innerText = "Assigned Students for: " + currentTeacher;
-        loadStudents();
-    }
-
-    function goToGrading() {
-        window.location.href = `grading.html?tid=${encodeURIComponent(currentTeacher)}`;
-    }
-
-    async function loadStudents() {
-        const { data, error } = await _sb.from('grades').select('*').eq('teacher_id', currentTeacher);
-        const list = document.getElementById('student-list');
-        list.innerHTML = "";
-
-        if (data && data.length > 0) {
-            data.forEach(s => {
-                list.innerHTML += `
-                    <tr>
-                        <td><b>${s.student_name}</b></td>
-                        <td>${s.student_class}</td>
-                        <td>${s.academic_year}</td>
-                        <td>
-                            <a href="check-result.html?name=${encodeURIComponent(s.student_name)}" class="btn btn-view">View</a>
-                            <button onclick="deleteStudent('${s.student_name}', ${s.id})" class="btn btn-del">Delete</button>
-                        </td>
-                    </tr>`;
-            });
-        } else {
-            list.innerHTML = "<tr><td colspan='4'>No students found. Click '+ Add New' to start.</td></tr>";
+    <script>
+        function enter() {
+            const id = document.getElementById('tid').value;
+            if(id) {
+                document.getElementById('login-overlay').style.display = "none";
+                alert("Login successful! Teacher ID: " + id);
+            }
         }
-    }
-
-    async function deleteStudent(name, id) {
-        if (confirm(`Delete record for ${name}? This cannot be undone.`)) {
-            const { error } = await _sb.from('grades').delete().eq('id', id).eq('teacher_id', currentTeacher);
-            if (error) alert(error.message);
-            else loadStudents();
-        }
-    }
-</script>
+    </script>
 </body>
-            </html>
+</html>
