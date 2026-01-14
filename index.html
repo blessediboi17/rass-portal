@@ -1,23 +1,59 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>RASS Portal | Home</title>
+    <meta charset="UTF-8">
+    <title>RASS Portal | Welcome</title>
     <style>
-        body { font-family: sans-serif; text-align: center; background: #003366; color: white; padding-top: 100px; }
-        .choice-card { background: white; color: #333; padding: 40px; border-radius: 15px; display: inline-block; width: 300px; }
-        .btn { display: block; padding: 15px; margin: 10px 0; text-decoration: none; border-radius: 8px; font-weight: bold; color: white; }
-        .teacher-btn { background: #003366; }
-        .student-btn { background: #28a745; }
+        body { 
+            font-family: 'Segoe UI', sans-serif; 
+            background: #003366; 
+            color: white; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+            margin: 0;
+        }
+        .gateway-card { 
+            background: white; 
+            padding: 40px; 
+            border-radius: 20px; 
+            color: #333; 
+            text-align: center; 
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            width: 350px;
+        }
+        .logo { width: 100px; margin-bottom: 10px; }
+        .btn { 
+            display: block; 
+            padding: 15px; 
+            margin: 15px 0; 
+            text-decoration: none; 
+            border-radius: 8px; 
+            font-weight: bold; 
+            color: white; 
+            transition: 0.3s;
+        }
+        .btn-teacher { background: #003366; } /* Leads to Dashboard */
+        .btn-student { background: #28a745; } /* Leads to Result Search */
+        .btn:hover { opacity: 0.8; transform: scale(1.02); }
     </style>
 </head>
 <body>
-    <div class="choice-card">
-        <h2>RASS Portal</h2>
-        <p>Select your portal:</p>
+
+    <div class="gateway-card">
+        <img src="IMG_20260107_084912.jpg" alt="Logo" class="logo">
+        <h2 style="margin-top:0;">Royal Academy</h2>
+        <p>Please select your portal to continue:</p>
         
-        <a href="dashboard.html" class="btn teacher-btn">TEACHER PORTAL</a>
+        <a href="dashboard.html" class="btn btn-teacher">TEACHER PORTAL</a>
         
-        <a href="check-result.html" class="btn student-btn">VIEW REPORT CARD</a>
+        <a href="check-result.html" class="btn btn-student">VIEW REPORT CARDS</a>
+        
+        <div style="font-size: 11px; color: #999; margin-top: 20px;">
+            Lower Johnsonville, Liberia
+        </div>
     </div>
+
 </body>
     </html>
