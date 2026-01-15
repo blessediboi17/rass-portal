@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASS Official Portal</title>
+    <title>RASS Teacher Portal</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         :root { --gold: #b8860b; --navy: #003366; --green: #28a745; }
@@ -80,8 +80,10 @@
 
 <script>
     const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
-    const validIDs = ["Blessed001", "Cooper002", "James003", "K1004", "Abc005", "Marcus007", "Ben008"];
+    
+    // Subjects exactly from your grade book photo
     const subjects = ["Bible", "English", "Reading", "General Science", "Mathematics", "Social Studies", "Spelling", "Phonics", "Health Science", "Writing", "Listening Skill", "Drawing", "P.E"];
+    const validIDs = ["Blessed001", "Cooper002", "James003"];
     let currentId = null;
 
     function login() {
@@ -90,7 +92,7 @@
             localStorage.setItem('tID', id);
             document.getElementById('login-view').style.display = 'none';
             document.getElementById('dash-view').style.display = 'block';
-            document.getElementById('welcome-text').innerText = "Teacher ID: " + id;
+            document.getElementById('welcome-text').innerText = "Logged in: " + id;
             loadStudents();
         } else { alert("Invalid ID"); }
     }
@@ -124,18 +126,16 @@
             document.getElementById('s_name').value = editData.student_name;
             document.getElementById('s_class').value = editData.student_class;
             document.getElementById('s_remarks').value = editData.teacher_remarks || "";
-            document.getElementById('form-title').innerText = "Editing: " + editData.student_name;
         } else {
             currentId = null;
             document.getElementById('s_name').value = "";
-            document.getElementById('form-title').innerText = "Add New Student";
         }
     }
 
     async function loadStudents() {
         const { data } = await _sb.from('grades').select('*').eq('teacher_id', localStorage.getItem('tID'));
         const list = document.getElementById('student-list');
-        list.innerHTML = data.length ? "" : "<p style='text-align:center;'>No students added yet.</p>";
+        list.innerHTML = data.length ? "" : "<p>No students found.</p>";
         data.forEach(s => {
             const card = document.createElement('div');
             card.className = 'student-card';
@@ -153,7 +153,7 @@
 
     async function saveData() {
         const name = document.getElementById('s_name').value;
-        if(!name) return alert("Please enter a name");
+        if(!name) return alert("Enter Student Name");
         
         let scores = {};
         subjects.forEach(sub => {
@@ -171,15 +171,14 @@
             student_class: document.getElementById('s_class').value,
             scores: scores,
             teacher_remarks: document.getElementById('s_remarks').value,
-            teacher_id: localStorage.getItem('tID'),
-            academic_year: "2025-2026"
+            teacher_id: localStorage.getItem('tID')
         };
 
         const { error } = currentId ? await _sb.from('grades').update(row).eq('id', currentId) : await _sb.from('grades').insert([row]);
         
         if(error) alert(error.message);
-        else { alert("Data Saved Successfully!"); showDash(); }
+        else { alert("Saved!"); showDash(); }
     }
 </script>
 </body>
-        </html>
+    </html>
