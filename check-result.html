@@ -3,49 +3,53 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Student Report Card</title>
+    <title>RASS | Student Report Card</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         body { font-family: serif; background: #f0f0f0; margin: 0; padding: 10px; }
-        .no-print { background: white; padding: 15px; border-radius: 10px; margin-bottom: 10px; text-align: center; }
-        .report-box { background: white; padding: 20px; border: 2px solid #003366; max-width: 850px; margin: auto; }
-        .school-header { text-align: center; border-bottom: 2px solid #003366; padding-bottom: 10px; }
-        .info { display: flex; flex-wrap: wrap; justify-content: space-between; margin: 15px 0; font-weight: bold; font-size: 14px; border-bottom: 1px solid #eee; padding-bottom: 10px; }
-        .scroll-table { overflow-x: auto; }
-        table { width: 100%; min-width: 600px; border-collapse: collapse; margin-top: 10px; }
-        th, td { border: 1px solid #000; padding: 5px; text-align: center; font-size: 11px; }
-        th { background: #f2f2f2; }
-        .avg-cell { background: #f9f9f9; font-weight: bold; }
+        .no-print { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .report-box { background: white; padding: 25px; border: 2px solid #003366; max-width: 850px; margin: auto; box-shadow: 0 0 20px rgba(0,0,0,0.2); }
+        .school-header { text-align: center; border-bottom: 3px double #003366; padding-bottom: 10px; margin-bottom: 15px; }
+        .info-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 15px; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        .scroll-table { overflow-x: auto; margin-top: 10px; }
+        table { width: 100%; min-width: 700px; border-collapse: collapse; }
+        th, td { border: 1px solid #000; padding: 6px; text-align: center; font-size: 11px; }
+        th { background: #eef2f7; color: #003366; }
+        .avg-cell { background: #f2f2f2; font-weight: bold; }
         .period-avg-row { background: #003366; color: white; font-weight: bold; }
         .red { color: red; font-weight: bold; }
-        @media print { .no-print { display: none; } body { background: white; padding: 0; } .report-box { border: none; } }
+        .status-text { font-size: 14px; font-weight: bold; color: #003366; margin-top: 5px; display: none; }
+        @media print { .no-print { display: none; } body { background: white; padding: 0; } .report-box { border: none; box-shadow: none; } }
     </style>
 </head>
 <body>
 
 <div class="no-print">
-    <input type="text" id="search" placeholder="Enter Full Student Name" style="padding:12px; width:65%; border:1px solid #ccc; border-radius:8px;">
-    <button onclick="fetchResult()" style="padding:12px; background:#003366; color:white; border:none; border-radius:8px;">View Result</button>
+    <h3 style="margin:0 0 10px 0; color:#003366;">Student Result Portal</h3>
+    <input type="text" id="search" placeholder="Enter Full Name" style="padding:14px; width:70%; border:1px solid #ccc; border-radius:10px; font-size:16px;">
+    <button onclick="fetchResult()" style="padding:14px 20px; background:#003366; color:white; border:none; border-radius:10px; font-weight:bold; cursor:pointer;">VIEW RESULT</button>
+    <div id="loading-status" class="status-text">Searching database...</div>
 </div>
 
 <div id="result" class="report-box" style="display:none;">
     <div class="school-header">
-        <h2 style="margin:0; color:#003366;">ROYAL ACADEMY</h2>
-        <div style="font-size:12px;">Lower Johnsonville, Montserrado, Liberia</div>
-        <h4 style="margin:10px 0 0 0; text-decoration: underline;">OFFICIAL STUDENT PROGRESS REPORT</h4>
+        <h2 style="margin:0; color:#003366; letter-spacing:1px;">ROYAL ACADEMY</h2>
+        <div style="font-size:13px; font-weight:bold;">Lower Johnsonville, Montserrado, Liberia</div>
+        <h4 style="margin:10px 0 0 0; text-decoration: underline; color:#333;">OFFICIAL PROGRESS REPORT</h4>
     </div>
     
-    <div class="info">
-        <span>STUDENT: <span id="rName"></span></span>
-        <span>CLASS: <span id="rClass"></span></span>
-        <span>YEAR: <span id="rYear"></span></span>
+    <div class="info-grid">
+        <div>STUDENT: <span id="rName" style="color:#003366;"></span></div>
+        <div>CLASS: <span id="rClass" style="color:#003366;"></span></div>
+        <div>ACADEMIC YEAR: <span id="rYear" style="color:#003366;"></span></div>
+        <div style="text-align:right;">STATUS: <span style="color:green;">OFFICIAL</span></div>
     </div>
 
     <div class="scroll-table">
         <table>
             <thead>
                 <tr>
-                    <th style="text-align:left;">SUBJECTS</th>
+                    <th style="text-align:left; width:150px;">SUBJECTS</th>
                     <th>1st</th><th>2nd</th><th>3rd</th><th>Ex1</th>
                     <th class="avg-cell">S1 AVG</th>
                     <th>4th</th><th>5th</th><th>6th</th><th>Ex2</th>
@@ -58,68 +62,104 @@
                     <td style="text-align:left;">PERIOD AVERAGE</td>
                     <td id="pa_p1">0</td><td id="pa_p2">0</td><td id="pa_p3">0</td><td id="pa_ex1">0</td>
                     <td style="background:#002244;">-</td>
-                    <td id="pa_p4">0</td><td id="pa_pa_p5">0</td><td id="pa_p6">0</td><td id="pa_ex2">0</td>
+                    <td id="pa_p4">0</td><td id="pa_p5">0</td><td id="pa_p6">0</td><td id="pa_ex2">0</td>
                     <td style="background:#002244;">-</td>
                 </tr>
             </tfoot>
         </table>
     </div>
 
-    <div style="margin-top:20px; border: 1px solid #000; padding:15px; min-height: 50px;">
-        <strong>TEACHER'S REMARKS:</strong> <br>
-        <span id="rRemarks" style="font-style: italic;"></span>
+    <div style="margin-top:20px; border: 1px solid #000; padding:15px; border-radius:5px;">
+        <strong style="text-decoration:underline;">TEACHER'S REMARKS:</strong> <br>
+        <p id="rRemarks" style="font-style: italic; margin-top:10px; color:#444;"></p>
     </div>
 
-    <div style="margin-top:40px; display:flex; justify-content: space-between;">
-        <div style="border-top: 1px solid #000; width: 200px; text-align: center; font-size: 12px;">Teacher's Signature</div>
-        <div style="border-top: 1px solid #000; width: 200px; text-align: center; font-size: 12px;">Principal's Signature</div>
+    <div style="margin-top:50px; display:flex; justify-content: space-between;">
+        <div style="border-top: 1px solid #000; width: 220px; text-align: center; padding-top:5px; font-size: 12px; font-weight:bold;">Teacher's Signature</div>
+        <div style="border-top: 1px solid #000; width: 220px; text-align: center; padding-top:5px; font-size: 12px; font-weight:bold;">Principal's Signature</div>
     </div>
 
-    <button class="no-print" onclick="window.print()" style="width:100%; padding:15px; margin-top:20px; background:#28a745; color:white; border:none; font-weight:bold; border-radius:10px;">Download / Print Report</button>
+    <button class="no-print" onclick="window.print()" style="width:100%; padding:15px; margin-top:25px; background:#28a745; color:white; border:none; font-weight:bold; border-radius:12px; font-size:16px; cursor:pointer;">DOWNLOAD AS PDF / PRINT</button>
 </div>
 
 <script>
+    // Initialize Supabase
     const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
     
-    async function fetchResult() {
-        const n = document.getElementById('search').value.trim();
-        const { data } = await _sb.from('grades').select('*').ilike('student_name', n).limit(1);
-        
-        if(data && data.length > 0) {
-            const res = data[0];
-            document.getElementById('rName').innerText = res.student_name.toUpperCase();
-            document.getElementById('rClass').innerText = res.student_class;
-            document.getElementById('rYear').innerText = res.academic_year;
-            document.getElementById('rRemarks').innerText = res.teacher_remarks;
+    // Auto-search if coming from Dashboard
+    window.onload = () => {
+        const urlName = new URLSearchParams(window.location.search).get('name');
+        if(urlName) { document.getElementById('search').value = urlName; fetchResult(); }
+    };
 
-            let h = "";
+    async function fetchResult() {
+        const nameInput = document.getElementById('search').value.trim();
+        const status = document.getElementById('loading-status');
+        const resultDiv = document.getElementById('result');
+
+        if(!nameInput) { alert("Please enter a student name"); return; }
+
+        status.style.display = "block";
+        status.innerText = "Searching database...";
+        resultDiv.style.display = "none";
+
+        // Query Supabase - Using ilike for flexible name matching
+        const { data, error } = await _sb
+            .from('grades')
+            .select('*')
+            .ilike('student_name', `%${nameInput}%`)
+            .limit(1);
+
+        status.style.display = "none";
+
+        if(error) {
+            alert("Database Error: " + error.message);
+            return;
+        }
+
+        if(data && data.length > 0) {
+            const student = data[0];
+            document.getElementById('rName').innerText = student.student_name.toUpperCase();
+            document.getElementById('rClass').innerText = student.student_class;
+            document.getElementById('rYear').innerText = student.academic_year;
+            document.getElementById('rRemarks').innerText = student.teacher_remarks || "No remarks provided.";
+
+            let tableHTML = "";
             let pTotals = {p1:0,p2:0,p3:0,ex1:0,p4:0,p5:0,p6:0,ex2:0}, pCounts = {p1:0,p2:0,p3:0,ex1:0,p4:0,p5:0,p6:0,ex2:0};
 
-            for (let s in res.scores) {
-                let r = `<tr><td style="text-align:left; font-weight:bold;">${s.toUpperCase()}</td>`;
+            // Loop through subjects in the score JSON
+            for (let sub in student.scores) {
+                let row = `<tr><td style="text-align:left; font-weight:bold; text-transform:uppercase;">${sub}</td>`;
                 let s1sum=0, s1c=0, s2sum=0, s2c=0;
 
                 ["p1","p2","p3","ex1","p4","p5","p6","ex2"].forEach((p, i) => {
-                    let v = parseFloat(res.scores[s][p]) || 0;
-                    if(v > 0) {
-                        pTotals[p] += v; pCounts[p]++;
-                        if(i < 4) { s1sum += v; s1c++; } else { s2sum += v; s2c++; }
+                    let val = parseFloat(student.scores[sub][p]) || 0;
+                    if(val > 0) {
+                        pTotals[p] += val; 
+                        pCounts[p]++;
+                        if(i < 4) { s1sum += val; s1c++; } else { s2sum += val; s2c++; }
                     }
-                    r += `<td class="${(v < 75 && v > 0) ? 'red' : ''}">${v || '-'}</td>`;
-                    if(i === 3) r += `<td class="avg-cell">${s1c > 0 ? (s1sum/s1c).toFixed(0) : 0}</td>`;
-                    if(i === 7) r += `<td class="avg-cell">${s2c > 0 ? (s2sum/s2c).toFixed(0) : 0}</td>`;
+                    row += `<td class="${(val < 75 && val > 0) ? 'red' : ''}">${val || '-'}</td>`;
+                    
+                    // Add Semester Averages
+                    if(i === 3) row += `<td class="avg-cell">${s1c > 0 ? (s1sum/s1c).toFixed(0) : 0}</td>`;
+                    if(i === 7) row += `<td class="avg-cell">${s2c > 0 ? (s2sum/s2c).toFixed(0) : 0}</td>`;
                 });
-                h += r + `</tr>`;
+                tableHTML += row + `</tr>`;
             }
-            document.getElementById('rTable').innerHTML = h;
             
-            // Set Period Averages
+            document.getElementById('rTable').innerHTML = tableHTML;
+            
+            // Calculate and set vertical Period Averages
             for(let p in pTotals) {
-                document.getElementById(`pa_${p}`).innerText = pCounts[p] > 0 ? (pTotals[p]/pCounts[p]).toFixed(1) : 0;
+                let avg = pCounts[p] > 0 ? (pTotals[p]/pCounts[p]).toFixed(1) : "0";
+                document.getElementById(`pa_${p}`).innerText = avg;
             }
 
-            document.getElementById('result').style.display = "block";
-        } else { alert("Student not found."); }
+            resultDiv.style.display = "block";
+        } else {
+            alert("No student record found for: " + nameInput);
+        }
     }
 </script>
 </body>
