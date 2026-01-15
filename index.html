@@ -3,25 +3,32 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>RASS Portal | Home</title>
+    <title>RASS | Teacher Login</title>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #003366; margin: 0; display: flex; justify-content: center; align-items: center; height: 100vh; }
-        .card { background: white; padding: 30px; border-radius: 20px; text-align: center; width: 85%; max-width: 350px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); }
-        .logo { width: 80px; margin-bottom: 10px; }
-        h2 { color: #003366; margin: 10px 0; font-size: 24px; }
-        .btn { display: block; padding: 18px; margin: 15px 0; text-decoration: none; border-radius: 12px; font-weight: bold; color: white; font-size: 16px; transition: 0.2s; }
-        .t-btn { background: #003366; }
-        .s-btn { background: #28a745; }
-        .btn:active { transform: scale(0.98); opacity: 0.9; }
+        body { font-family: 'Segoe UI', sans-serif; background: #001a33; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
+        .login-card { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; border-top: 6px solid #b8860b; }
+        .logo { width: 100px; margin-bottom: 10px; }
+        h2 { color: #003366; margin-bottom: 20px; text-transform: uppercase; }
+        input { width: 100%; padding: 15px; margin-bottom: 20px; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        button { width: 100%; padding: 15px; background: #28a745; color: white; border: none; border-radius: 10px; font-size: 18px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-    <div class="card">
-        <img src="IMG_20260107_084912.jpg" alt="Logo" class="logo">
-        <h2>Royal Academy</h2>
-        <p style="color:#666; margin-bottom: 25px;">Portal Management System</p>
-        <a href="dashboard.html" class="btn t-btn">TEACHER PORTAL</a>
-        <a href="check-result.html" class="btn s-btn">STUDENT RESULTS</a>
+    <div class="login-card">
+        <h1 style="color:#b8860b; margin:0;">RASS</h1>
+        <h2>Teacher Portal</h2>
+        <input type="text" id="tid" placeholder="Enter Teacher ID (e.g. Blessed001)">
+        <button onclick="checkLogin()">LOGIN</button>
     </div>
+    <script>
+        const validIDs = ["Blessed001", "Cooper002", "James003", "K1004", "Abc005", "Micheal007", "Ben008"];
+        function checkLogin() {
+            const id = document.getElementById('tid').value.trim();
+            if(validIDs.includes(id)) {
+                localStorage.setItem('teacherID', id);
+                window.location.href = "dashboard.html"; // Ensure this matches your file name
+            } else { alert("Invalid ID"); }
+        }
+    </script>
 </body>
-</html>
+    </html>
