@@ -3,82 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Teacher Dashboard</title>
+    <title>RASS Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { font-family: sans-serif; background: #f4f7f6; margin: 0; padding: 10px; }
-        .header { background: #003366; color: white; padding: 15px; border-radius: 12px; text-align: center; margin-bottom: 15px; }
-        .student-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 12px; box-shadow: 0 2px 8px rgba(0,0,0,0.08); display: flex; justify-content: space-between; align-items: center; border-left: 5px solid #003366; }
-        .btn { padding: 10px 14px; border: none; border-radius: 8px; font-weight: bold; text-decoration: none; font-size: 13px; cursor: pointer; }
-        .btn-add { background: #28a745; color: white; width: 100%; padding: 16px; font-size: 16px; margin-bottom: 15px; display: block; text-align: center; border-radius: 12px; border: none; font-weight: bold; }
-        .btn-view { background: #003366; color: white; margin-right: 5px; }
-        .btn-del { background: #dc3545; color: white; }
-        .login-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #003366; z-index: 2000; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 320px; text-align: center; }
-        input { width: 100%; padding: 14px; margin: 15px 0; border: 1px solid #ddd; border-radius: 10px; box-sizing: border-box; font-size: 16px; }
+        body { font-family: sans-serif; background: #f4f4f4; padding: 15px; }
+        .header { background: #003366; color: white; padding: 20px; border-radius: 10px; text-align: center; margin-bottom: 20px; border-bottom: 4px solid #b8860b; }
+        .card { background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); margin-bottom: 20px; }
+        input, select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ccc; border-radius: 8px; box-sizing: border-box; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .save-btn { background: #b8860b; color: white; padding: 15px; width: 100%; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
-
-<div id="login-overlay" class="login-overlay">
-    <div class="login-box">
-        <h2 style="color:#003366; margin:0;">Teacher Login</h2>
-        <input type="text" id="tid-input" placeholder="Enter Teacher ID">
-        <button onclick="login()" class="btn-add" style="margin:0;">Login</button>
+    <div class="header">
+        <h2 id="teacherName">Welcome, Teacher</h2>
+        <p>Royal Academy School System</p>
     </div>
-</div>
 
-<div class="header">
-    <h3 style="margin:0;">RASS Dashboard</h3>
-    <span id="t-display" style="font-size:12px; opacity:0.8;"></span>
-</div>
+    <div class="card">
+        <h3>Student Information</h3>
+        <input type="text" id="sName" placeholder="Full Student Name">
+        <input type="text" id="sClass" placeholder="Class (e.g. Grade 1)">
+    </div>
 
-<button onclick="goToGrading()" class="btn-add">+ ADD NEW STUDENT</button>
-<div id="student-list"></div>
+    <div id="subjectContainer"></div>
 
-<script>
-    const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
-    const validIDs = ["Blessed001", "Cooper002", "James003", "K1004", "Abc005", "Marcus007", "Ben008"];
-    let currentTid = "";
+    <button class="save-btn" onclick="saveData()">SAVE ALL GRADES</button>
 
-    function login() {
-        const val = document.getElementById('tid-input').value.trim();
-        if(validIDs.includes(val)) {
-            currentTid = val;
-            document.getElementById('login-overlay').style.display="none";
-            document.getElementById('t-display').innerText = "Logged in: " + val;
-            loadStudents();
-        } else { alert("Access Denied: Invalid Teacher ID"); }
-    }
-
-    function goToGrading() { window.location.href = `grading.html?tid=${currentTid}`; }
-
-    async function loadStudents() {
-        const { data } = await _sb.from('grades').select('*').eq('teacher_id', currentTid);
-        const container = document.getElementById('student-list');
-        container.innerHTML = "";
-        if(!data || data.length === 0) container.innerHTML = "<p style='text-align:center; color:#888;'>No students found.</p>";
-        data?.forEach(s => {
+    <script>
+        const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
+        const subjects = ["Bible", "English", "Reading", "Math", "Science", "Social Studies"];
+        
+        // Display Subject Inputs
+        const container = document.getElementById('subjectContainer');
+        subjects.forEach(sub => {
             container.innerHTML += `
-                <div class="student-card">
-                    <div>
-                        <div style="font-weight:bold; font-size:16px; color:#003366;">${s.student_name}</div>
-                        <div style="font-size:12px; color:#666;">Class: ${s.student_class} | ${s.academic_year}</div>
+                <div class="card">
+                    <h4>${sub}</h4>
+                    <div class="grid">
+                        <input type="number" id="${sub}_p1" placeholder="1st Pd">
+                        <input type="number" id="${sub}_p2" placeholder="2nd Pd">
                     </div>
-                    <div style="display:flex;">
-                        <a href="check-result.html?name=${encodeURIComponent(s.student_name)}" class="btn btn-view">View</a>
-                        <button onclick="delStudent(${s.id}, '${s.student_name}')" class="btn btn-del">Del</button>
-                    </div>
-                </div>`;
+                </div>
+            `;
         });
-    }
 
-    async function delStudent(id, name) {
-        if(confirm("Permanently delete " + name + "?")) {
-            await _sb.from('grades').delete().eq('id', id);
-            loadStudents();
+        async function saveData() {
+            const name = document.getElementById('sName').value;
+            const sClass = document.getElementById('sClass').value;
+            let scores = {};
+            subjects.forEach(sub => {
+                scores[sub.toLowerCase()] = {
+                    p1: document.getElementById(`${sub}_p1`).value,
+                    p2: document.getElementById(`${sub}_p2`).value
+                };
+            });
+
+            const { error } = await _sb.from('grades').upsert({
+                student_name: name,
+                student_class: sClass,
+                scores: scores,
+                teacher_id: localStorage.getItem('teacherID')
+            });
+
+            if (error) alert("Error: " + error.message);
+            else alert("Grades Saved Successfully!");
         }
-    }
-</script>
+    </script>
 </body>
-        </html>
+    </html> 
