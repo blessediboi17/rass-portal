@@ -9,58 +9,60 @@
         :root { --gold: #b8860b; --navy: #003366; --green: #28a745; }
         body { font-family: -apple-system, sans-serif; margin: 0; background: #001a33; color: #333; }
         
-        /* Login Screen */
-        #login-view { height: 100vh; display: flex; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 30px; border-radius: 20px; width: 85%; max-width: 350px; text-align: center; border-top: 8px solid var(--gold); }
+        /* LOGIN BOX DESIGN */
+        #login-view { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
+        .login-box { background: white; padding: 40px 30px; border-radius: 24px; width: 85%; max-width: 350px; text-align: center; border-top: 10px solid var(--gold); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
         
-        /* Dashboard Screen */
-        #dash-view { display: none; background: #f0f2f5; min-height: 100vh; padding: 15px; }
+        /* DASHBOARD & HEADER */
         .header { background: var(--navy); color: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 5px solid var(--gold); margin-bottom: 20px; }
         .student-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--gold); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
         
-        /* Grading Screen */
-        #grading-view { display: none; background: white; padding: 15px; border-radius: 15px; }
-        .scroll-table { overflow-x: auto; margin: 15px 0; border: 1px solid #ddd; border-radius: 8px; }
-        table { width: 100%; min-width: 500px; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 10px; text-align: center; font-size: 13px; }
-        th { background: var(--navy); color: white; }
-        input[type="number"] { width: 50px; padding: 8px; border: 1px solid #ccc; border-radius: 5px; text-align: center; font-size: 14px; }
-        
-        /* Buttons */
-        input[type="text"], select { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; box-sizing: border-box; }
-        .btn { width: 100%; padding: 15px; border: none; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; }
+        /* INPUTS & BUTTONS */
+        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; }
+        input:focus { border-color: var(--gold); }
+        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s; }
         .btn-green { background: var(--green); color: white; }
         .btn-navy { background: var(--navy); color: white; }
-        .btn-gold { background: var(--gold); color: white; position: sticky; bottom: 10px; }
+        .btn-gold { background: var(--gold); color: white; margin-top: 20px; }
+        
+        /* TABLE DESIGN */
+        .scroll-table { overflow-x: auto; background: white; border-radius: 12px; border: 1px solid #ddd; margin: 15px 0; }
+        table { width: 100%; min-width: 450px; border-collapse: collapse; }
+        th { background: var(--navy); color: white; padding: 10px; font-size: 12px; }
+        td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; }
+        .sub-name { text-align: left; font-weight: bold; font-size: 14px; color: var(--navy); }
     </style>
 </head>
 <body>
 
 <div id="login-view">
     <div class="login-box">
-        <h1 style="color: var(--navy); margin: 0;">RASS</h1>
-        <p style="color: var(--gold); font-weight: bold;">TEACHER LOGIN</p>
-        <input type="text" id="teacher-id" placeholder="Enter ID (e.g. Blessed001)">
-        <button class="btn btn-green" onclick="login()">LOGIN</button>
+        <h1 style="color: var(--navy); margin: 0; letter-spacing: 2px;">RASS</h1>
+        <p style="color: var(--gold); font-weight: bold; margin-top: 5px; font-size: 14px;">OFFICIAL TEACHER PORTAL</p>
+        <input type="text" id="teacher-id" placeholder="Username / Teacher ID">
+        <button class="btn btn-green" onclick="login()">LOGIN TO SYSTEM</button>
     </div>
+    <p style="color: white; margin-top: 20px; font-size: 13px; opacity: 0.7;">Royal Academy School System</p>
 </div>
 
-<div id="dash-view">
+<div id="dash-view" style="display:none; padding:15px; background:#f0f2f5; min-height:100vh;">
     <div class="header">
         <h2 style="margin:0;">ROYAL ACADEMY</h2>
         <small id="welcome-text"></small>
     </div>
     <button class="btn btn-green" onclick="showGrading()">+ ADD NEW STUDENT</button>
-    <div id="student-list" style="margin-top:20px;">Loading...</div>
+    <div id="student-list" style="margin-top:20px;"></div>
 </div>
 
-<div id="grading-view">
-    <button onclick="showDash()" style="background:none; border:none; color:var(--navy); font-weight:bold; cursor:pointer;">← BACK</button>
-    <h3>Student Grade Entry</h3>
-    <input type="text" id="s_name" placeholder="Full Student Name">
+<div id="grading-view" style="display:none; background:white; padding:15px; min-height:100vh;">
+    <button onclick="showDash()" style="background:none; border:none; color:var(--navy); font-weight:bold; cursor:pointer; padding: 10px 0;">← BACK TO LIST</button>
+    <h3 id="form-title" style="margin:0; color: var(--navy);">Grade Entry</h3>
+    
+    <input type="text" id="s_name" placeholder="Student Full Name">
     <select id="s_class">
         <option>ABC</option><option>K1</option><option>K2</option>
         <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
+        <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
     </select>
 
     <div class="scroll-table">
@@ -68,35 +70,40 @@
             <thead>
                 <tr>
                     <th style="text-align:left;">Subject</th>
-                    <th>1st Pd</th><th>2nd Pd</th><th>3rd Pd</th><th>Exam</th>
+                    <th>1st</th><th>2nd</th><th>3rd</th><th>Exam</th>
                 </tr>
             </thead>
-            <tbody id="grade-rows"></tbody>
+            <tbody id="grade-rows">
+                </tbody>
         </table>
     </div>
-    <textarea id="s_remarks" placeholder="Teacher's Remarks..." style="width:100%; height:80px; border-radius:10px; padding:10px; border:1px solid #ddd; box-sizing:border-box;"></textarea>
+
+    <textarea id="s_remarks" placeholder="Teacher's Remarks..."></textarea>
     <button class="btn btn-gold" onclick="saveData()">SAVE STUDENT RECORD</button>
 </div>
 
 <script>
+    // Database Connection
     const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
     
-    // Subjects taken directly from your school photo
+    // Exact Subject List from your photo
     const subjects = ["Bible", "English", "Reading", "General Science", "Mathematics", "Social Studies", "Spelling", "Phonics", "Health Science", "Writing", "Listening Skill", "Drawing", "P.E"];
-    const validIDs = ["Blessed001", "Cooper002", "James003", "K1004", "Abc005", "Marcus007", "Ben008"];
+    const validIDs = ["Blessed001", "Cooper002", "James003", "K1004", "Abc005", "Ben008"];
     let currentId = null;
 
+    // LOGIN LOGIC
     function login() {
         const id = document.getElementById('teacher-id').value.trim();
         if(validIDs.includes(id)) {
             localStorage.setItem('tID', id);
             document.getElementById('login-view').style.display = 'none';
             document.getElementById('dash-view').style.display = 'block';
-            document.getElementById('welcome-text').innerText = "Logged in: " + id;
+            document.getElementById('welcome-text').innerText = "Teacher ID: " + id;
             loadStudents();
-        } else { alert("Invalid ID"); }
+        } else { alert("Invalid Teacher ID"); }
     }
 
+    // NAVIGATION
     function showDash() {
         document.getElementById('grading-view').style.display = 'none';
         document.getElementById('dash-view').style.display = 'block';
@@ -106,18 +113,17 @@
     function showGrading(editData = null) {
         document.getElementById('dash-view').style.display = 'none';
         document.getElementById('grading-view').style.display = 'block';
-        
         const tbody = document.getElementById('grade-rows');
         tbody.innerHTML = "";
-        
+
         subjects.forEach(sub => {
             let slug = sub.toLowerCase().replace(/\s/g, '');
             tbody.innerHTML += `<tr>
-                <td style="text-align:left; font-weight:bold;">${sub}</td>
-                <td><input type="number" id="${slug}_p1" value="${editData?.scores[slug]?.p1 || ''}"></td>
-                <td><input type="number" id="${slug}_p2" value="${editData?.scores[slug]?.p2 || ''}"></td>
-                <td><input type="number" id="${slug}_p3" value="${editData?.scores[slug]?.p3 || ''}"></td>
-                <td><input type="number" id="${slug}_ex" value="${editData?.scores[slug]?.ex || ''}"></td>
+                <td class="sub-name">${sub}</td>
+                <td><input type="number" id="${slug}_p1" value="${editData?.scores[slug]?.p1 || ''}" style="width:50px; padding:5px; margin:0;"></td>
+                <td><input type="number" id="${slug}_p2" value="${editData?.scores[slug]?.p2 || ''}" style="width:50px; padding:5px; margin:0;"></td>
+                <td><input type="number" id="${slug}_p3" value="${editData?.scores[slug]?.p3 || ''}" style="width:50px; padding:5px; margin:0;"></td>
+                <td><input type="number" id="${slug}_ex" value="${editData?.scores[slug]?.ex || ''}" style="width:50px; padding:5px; margin:0;"></td>
             </tr>`;
         });
 
@@ -126,29 +132,31 @@
             document.getElementById('s_name').value = editData.student_name;
             document.getElementById('s_class').value = editData.student_class;
             document.getElementById('s_remarks').value = editData.teacher_remarks || "";
+            document.getElementById('form-title').innerText = "Editing: " + editData.student_name;
         } else {
             currentId = null;
             document.getElementById('s_name').value = "";
+            document.getElementById('form-title').innerText = "New Student Entry";
         }
     }
 
+    // DATABASE OPERATIONS
     async function loadStudents() {
         const { data } = await _sb.from('grades').select('*').eq('teacher_id', localStorage.getItem('tID'));
         const list = document.getElementById('student-list');
-        list.innerHTML = data.length ? "" : "<p>No students found.</p>";
-        data.forEach(s => {
-            const card = document.createElement('div');
-            card.className = 'student-card';
-            card.innerHTML = `<div><strong>${s.student_name}</strong><br><small>${s.student_class}</small></div>`;
-            const btn = document.createElement('button');
-            btn.className = 'btn-navy';
-            btn.style.width = 'auto';
-            btn.style.padding = '8px 15px';
-            btn.innerText = "Edit";
-            btn.onclick = () => showGrading(s);
-            card.appendChild(btn);
-            list.appendChild(card);
-        });
+        list.innerHTML = data && data.length ? "" : "<p style='text-align:center;'>No students found.</p>";
+        if(data) {
+            data.forEach(s => {
+                const card = document.createElement('div');
+                card.className = 'student-card';
+                card.innerHTML = `<div><strong>${s.student_name}</strong><br><small>${s.student_class}</small></div>`;
+                const btn = document.createElement('button');
+                btn.className = 'btn-navy'; btn.style.width = 'auto'; btn.style.padding = '8px 15px'; btn.innerText = "Edit";
+                btn.onclick = () => showGrading(s);
+                card.appendChild(btn);
+                list.appendChild(card);
+            });
+        }
     }
 
     async function saveData() {
@@ -171,14 +179,15 @@
             student_class: document.getElementById('s_class').value,
             scores: scores,
             teacher_remarks: document.getElementById('s_remarks').value,
-            teacher_id: localStorage.getItem('tID')
+            teacher_id: localStorage.getItem('tID'),
+            academic_year: "2025-2026"
         };
 
         const { error } = currentId ? await _sb.from('grades').update(row).eq('id', currentId) : await _sb.from('grades').insert([row]);
         
-        if(error) alert(error.message);
-        else { alert("Student Data Saved!"); showDash(); }
+        if(error) alert("Database Error: " + error.message);
+        else { alert("Successfully Saved!"); showDash(); }
     }
 </script>
 </body>
-    </html>
+        </html>
