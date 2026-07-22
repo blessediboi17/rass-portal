@@ -52,38 +52,41 @@
     </div>
 
     <!-- Navigation Header -->
-    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
-        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-brandNavy rounded-full flex items-center justify-center p-1 shadow-md border-2 border-brandGold">
-                    <span class="text-brandGold font-black text-lg">RASS</span>
-                </div>
-                <div>
-                    <h1 class="font-bold text-brandNavy text-base sm:text-lg leading-tight">Royal Academic</h1>
-                    <p class="text-xs text-slate-500 font-medium tracking-wider">SCHOOL SYSTEM</p>
-                </div>
+<header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+            <!-- School Logo Image -->
+            <div class="w-12 h-12 rounded-full overflow-hidden shadow-md border-2 border-brandGold bg-brandNavy flex items-center justify-center">
+                <img src="logo.png" alt="RASS Logo" class="w-full h-full object-cover">
             </div>
-
-            <!-- Desktop Nav -->
-            <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-slate-700">
-                <a href="#home" class="hover:text-brandGold transition">Home</a>
-                <a href="#about" class="hover:text-brandGold transition">About Us</a>
-                <a href="#admission" class="bg-brandGold text-brandNavy font-bold px-4 py-2 rounded-full shadow hover:bg-brandGoldHover transition">Apply For Admission</a>
-            </nav>
-
-            <!-- Mobile Menu Button -->
-            <button id="menu-btn" class="md:hidden text-brandNavy text-2xl focus:outline-none">
-                <i class="fa-solid fa-bars"></i>
-            </button>
+            <div>
+                <h1 class="font-bold text-brandNavy text-base sm:text-lg leading-tight">Royal Academic</h1>
+                <p class="text-xs text-slate-500 font-medium tracking-wider">SCHOOL SYSTEM</p>
+            </div>
         </div>
 
-        <!-- Mobile Menu Drawer -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3 shadow-lg">
-            <a href="#home" class="block py-2 text-slate-700 font-medium border-b border-slate-100">Home</a>
-            <a href="#about" class="block py-2 text-slate-700 font-medium border-b border-slate-100">About Us</a>
-            <a href="#admission" class="block py-2 text-brandNavy font-bold">Apply For Admission</a>
-        </div>
-    </header>
+        <!-- Desktop Nav -->
+        <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-slate-700">
+            <a href="#home" class="hover:text-brandGold transition">Home</a>
+            <a href="#about" class="hover:text-brandGold transition">About Us</a>
+            <a href="#gallery" class="hover:text-brandGold transition">Gallery</a>
+            <a href="#admission" class="bg-brandGold text-brandNavy font-bold px-4 py-2 rounded-full shadow hover:bg-brandGoldHover transition">Apply For Admission</a>
+        </nav>
+
+        <!-- Mobile Menu Button -->
+        <button id="menu-btn" class="md:hidden text-brandNavy text-2xl focus:outline-none">
+            <i class="fa-solid fa-bars"></i>
+        </button>
+    </div>
+
+    <!-- Mobile Menu Drawer -->
+    <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3 shadow-lg">
+        <a href="#home" class="block py-2 text-slate-700 font-medium border-b border-slate-100">Home</a>
+        <a href="#about" class="block py-2 text-slate-700 font-medium border-b border-slate-100">About Us</a>
+        <a href="#gallery" class="block py-2 text-slate-700 font-medium border-b border-slate-100">Gallery</a>
+        <a href="#admission" class="block py-2 text-brandNavy font-bold">Apply For Admission</a>
+    </div>
+</header>
 
     <!-- Hero Section -->
     <section id="home" class="relative bg-brandNavy text-white overflow-hidden py-16 sm:py-24">
