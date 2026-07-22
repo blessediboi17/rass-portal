@@ -1,193 +1,386 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>RASS Teacher Portal</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <style>
-        :root { --gold: #b8860b; --navy: #003366; --green: #28a745; }
-        body { font-family: -apple-system, sans-serif; margin: 0; background: #001a33; color: #333; }
-        
-        /* LOGIN BOX DESIGN */
-        #login-view { height: 100vh; display: flex; flex-direction: column; justify-content: center; align-items: center; }
-        .login-box { background: white; padding: 40px 30px; border-radius: 24px; width: 85%; max-width: 350px; text-align: center; border-top: 10px solid var(--gold); box-shadow: 0 15px 35px rgba(0,0,0,0.4); }
-        
-        /* DASHBOARD & HEADER */
-        .header { background: var(--navy); color: white; padding: 20px; border-radius: 15px; text-align: center; border-bottom: 5px solid var(--gold); margin-bottom: 20px; }
-        .student-card { background: white; padding: 15px; border-radius: 12px; margin-bottom: 10px; display: flex; justify-content: space-between; align-items: center; border-left: 6px solid var(--gold); box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        
-        /* INPUTS & BUTTONS */
-        input[type="text"], input[type="number"], select, textarea { width: 100%; padding: 14px; margin: 10px 0; border: 2px solid #eee; border-radius: 12px; box-sizing: border-box; font-size: 16px; outline: none; }
-        input:focus { border-color: var(--gold); }
-        .btn { width: 100%; padding: 16px; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; font-size: 16px; margin-top: 10px; transition: 0.3s; }
-        .btn-green { background: var(--green); color: white; }
-        .btn-navy { background: var(--navy); color: white; }
-        .btn-gold { background: var(--gold); color: white; margin-top: 20px; }
-        
-        /* TABLE DESIGN */
-        .scroll-table { overflow-x: auto; background: white; border-radius: 12px; border: 1px solid #ddd; margin: 15px 0; }
-        table { width: 100%; min-width: 450px; border-collapse: collapse; }
-        th { background: var(--navy); color: white; padding: 10px; font-size: 12px; }
-        td { border-bottom: 1px solid #eee; padding: 10px; text-align: center; }
-        .sub-name { text-align: left; font-weight: bold; font-size: 14px; color: var(--navy); }
-    </style>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- Primary SEO Meta Tags -->
+    <title>Royal Academic School System (RASS) | Best Elementary School in Johnsonville & Monrovia</title>
+    <meta name="title" content="Royal Academic School System (RASS) | Best Elementary School in Johnsonville & Monrovia">
+    <meta name="description" content="Royal Academic School System (RASS) in Kpeh-Kpeh Town, Johnsonville, Monrovia, Liberia. Raising a generation of change through quality education, strong moral values, discipline, and academic excellence. Admissions open for Daycare to 6th Grade.">
+    <meta name="keywords" content="Royal Academic School System, RASS, best school in Johnsonville, schools in Johnsonville, schools in Monrovia, kpeh kpeh town schools, best school in Monrovia, elementary school in Monrovia, elementary school in Johnsonville, schools in kpelleh town Johnsonville, Liberia schools, Daycare and elementary enrollment Monrovia">
+    <meta name="author" content="Blessed Studios">
+    <meta name="robots" content="index, follow">
+
+    <!-- Open Graph / Social Media Preview Tags -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Royal Academic School System (RASS) | Best School in Johnsonville">
+    <meta property="og:description" content="Building a future through learning, character & leadership. Enroll your child today in Daycare through 6th Grade at Johnsonville Kpeh-Kpeh Town.">
+
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        brandNavy: '#0b192c',
+                        brandBlue: '#1e3e62',
+                        brandGold: '#ffb703',
+                        brandGoldHover: '#fb8500',
+                    }
+                }
+            }
+        }
+    </script>
+    <!-- FontAwesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
-<body>
+<body class="bg-slate-50 text-slate-800 font-sans antialiased selection:bg-brandGold selection:text-brandNavy">
 
-<div id="login-view">
-    <div class="login-box">
-        <h1 style="color: var(--navy); margin: 0; letter-spacing: 2px;">RASS</h1>
-        <p style="color: var(--gold); font-weight: bold; margin-top: 5px; font-size: 14px;">OFFICIAL TEACHER PORTAL</p>
-        <input type="text" id="teacher-id" placeholder="Username / Teacher ID">
-        <button class="btn btn-green" onclick="login()">LOGIN TO SYSTEM</button>
-    </div>
-    <p style="color: white; margin-top: 20px; font-size: 13px; opacity: 0.7;">Royal Academy School System</p>
-</div>
-
-<div id="dash-view" style="display:none; padding:15px; background:#f0f2f5; min-height:100vh;">
-    <div class="header">
-        <h2 style="margin:0;">ROYAL ACADEMY</h2>
-        <small id="welcome-text"></small>
-    </div>
-    <button class="btn btn-green" onclick="showGrading()">+ ADD NEW STUDENT</button>
-    <div id="student-list" style="margin-top:20px;"></div>
-</div>
-
-<div id="grading-view" style="display:none; background:white; padding:15px; min-height:100vh;">
-    <button onclick="showDash()" style="background:none; border:none; color:var(--navy); font-weight:bold; cursor:pointer; padding: 10px 0;">← BACK TO LIST</button>
-    <h3 id="form-title" style="margin:0; color: var(--navy);">Grade Entry</h3>
-    
-    <input type="text" id="s_name" placeholder="Student Full Name">
-    <select id="s_class">
-        <option>ABC</option><option>K1</option><option>K2</option>
-        <option>Grade 1</option><option>Grade 2</option><option>Grade 3</option>
-        <option>Grade 4</option><option>Grade 5</option><option>Grade 6</option>
-    </select>
-
-    <div class="scroll-table">
-        <table>
-            <thead>
-                <tr>
-                    <th style="text-align:left;">Subject</th>
-                    <th>1st</th><th>2nd</th><th>3rd</th><th>Exam</th>
-                </tr>
-            </thead>
-            <tbody id="grade-rows">
-                </tbody>
-        </table>
+    <!-- Top Bar -->
+    <div class="bg-brandNavy text-white text-xs py-2 px-4">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2">
+            <div class="flex items-center gap-4">
+                <span><i class="fa-solid fa-location-dot text-brandGold mr-1"></i> Johnsonville kpeh-kpeh town, Monrovia - Liberia</span>
+            </div>
+            <div class="flex items-center gap-4">
+                <span><i class="fa-solid fa-phone text-brandGold mr-1"></i> +231 77 741 3546 / +231 77 934 6510</span>
+            </div>
+        </div>
     </div>
 
-    <textarea id="s_remarks" placeholder="Teacher's Remarks..."></textarea>
-    <button class="btn btn-gold" onclick="saveData()">SAVE STUDENT RECORD</button>
-</div>
+    <!-- Navigation Header -->
+    <header class="sticky top-0 z-50 bg-white/95 backdrop-blur-md shadow-sm border-b border-slate-100">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <div class="w-12 h-12 bg-brandNavy rounded-full flex items-center justify-center p-1 shadow-md border-2 border-brandGold">
+                    <span class="text-brandGold font-black text-lg">RASS</span>
+                </div>
+                <div>
+                    <h1 class="font-bold text-brandNavy text-base sm:text-lg leading-tight">Royal Academic</h1>
+                    <p class="text-xs text-slate-500 font-medium tracking-wider">SCHOOL SYSTEM</p>
+                </div>
+            </div>
 
-<script>
-    // Database Connection
-    const _sb = supabase.createClient('https://thhrfrxvaxezcoutpzby.supabase.co', 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRoaHJmcnh2YXhlemNvdXRwemJ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njc3NjY2NTAsImV4cCI6MjA4MzM0MjY1MH0.9oYLT4E5_lvDn8TSO2L1T2JPG3YLQPuh2tzAYYZW6qI');
-    
-    // Exact Subject List from your photo
-    const subjects = ["Bible", "English", "Reading", "General Science", "Mathematics", "Social Studies", "Spelling", "Phonics", "Health Science", "Writing", "Listening Skill", "Drawing", "P.E"];
-    const validIDs = ["Blessed001", "Cooper002", "James003", "K1004", "Abc005", "Ben008"];
-    let currentId = null;
+            <!-- Desktop Nav -->
+            <nav class="hidden md:flex items-center gap-8 font-medium text-sm text-slate-700">
+                <a href="#home" class="hover:text-brandGold transition">Home</a>
+                <a href="#about" class="hover:text-brandGold transition">About Us</a>
+                <a href="#admission" class="bg-brandGold text-brandNavy font-bold px-4 py-2 rounded-full shadow hover:bg-brandGoldHover transition">Apply For Admission</a>
+            </nav>
 
-    // LOGIN LOGIC
-    function login() {
-        const id = document.getElementById('teacher-id').value.trim();
-        if(validIDs.includes(id)) {
-            localStorage.setItem('tID', id);
-            document.getElementById('login-view').style.display = 'none';
-            document.getElementById('dash-view').style.display = 'block';
-            document.getElementById('welcome-text').innerText = "Teacher ID: " + id;
-            loadStudents();
-        } else { alert("Invalid Teacher ID"); }
-    }
+            <!-- Mobile Menu Button -->
+            <button id="menu-btn" class="md:hidden text-brandNavy text-2xl focus:outline-none">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+        </div>
 
-    // NAVIGATION
-    function showDash() {
-        document.getElementById('grading-view').style.display = 'none';
-        document.getElementById('dash-view').style.display = 'block';
-        loadStudents();
-    }
+        <!-- Mobile Menu Drawer -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-b border-slate-200 px-4 pt-2 pb-6 space-y-3 shadow-lg">
+            <a href="#home" class="block py-2 text-slate-700 font-medium border-b border-slate-100">Home</a>
+            <a href="#about" class="block py-2 text-slate-700 font-medium border-b border-slate-100">About Us</a>
+            <a href="#admission" class="block py-2 text-brandNavy font-bold">Apply For Admission</a>
+        </div>
+    </header>
 
-    function showGrading(editData = null) {
-        document.getElementById('dash-view').style.display = 'none';
-        document.getElementById('grading-view').style.display = 'block';
-        const tbody = document.getElementById('grade-rows');
-        tbody.innerHTML = "";
+    <!-- Hero Section -->
+    <section id="home" class="relative bg-brandNavy text-white overflow-hidden py-16 sm:py-24">
+        <div class="absolute inset-0 opacity-20 bg-[radial-gradient(#ffb703_1px,transparent_1px)] [background-size:16px_16px]"></div>
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10 grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <div class="space-y-6 text-center lg:text-left">
+                <span class="inline-block bg-brandGold/20 text-brandGold text-xs font-bold uppercase tracking-widest px-3 py-1 rounded-full border border-brandGold/30">
+                    Welcome to RASS • Est. 2017
+                </span>
+                <h1 class="text-3xl sm:text-5xl font-extrabold tracking-tight leading-tight">
+                    RAISING A GENERATION OF <span class="text-brandGold">CHANGE</span>
+                </h1>
+                <p class="text-slate-300 text-sm sm:text-base max-w-xl mx-auto lg:mx-0">
+                    Building a future through learning, character & leadership. We provide quality education with strong moral values, discipline, and academic excellence in Johnsonville.
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center lg:justify-start gap-4 pt-2">
+                    <button onclick="toggleAdmissionModal(true)" class="bg-brandGold text-brandNavy font-bold px-8 py-3.5 rounded-xl shadow-lg hover:bg-brandGoldHover transition text-center">
+                        Enroll Now
+                    </button>
+                </div>
+            </div>
+            <div class="bg-brandBlue/40 p-4 rounded-3xl border border-white/10 backdrop-blur-md shadow-2xl">
+                <div class="rounded-2xl overflow-hidden shadow-inner bg-brandNavy relative aspect-video flex items-center justify-center border border-white/10">
+                    <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent flex items-end p-6">
+                        <div>
+                            <span class="bg-brandGold text-brandNavy text-xs font-bold px-2.5 py-1 rounded">Admissions Open</span>
+                            <h3 class="text-white font-bold text-lg mt-2">Enroll Your Child Today</h3>
+                        </div>
+                    </div>
+                    <i class="fa-solid fa-graduation-cap text-6xl text-brandGold/40"></i>
+                </div>
+            </div>
+        </div>
+    </section>
 
-        subjects.forEach(sub => {
-            let slug = sub.toLowerCase().replace(/\s/g, '');
-            tbody.innerHTML += `<tr>
-                <td class="sub-name">${sub}</td>
-                <td><input type="number" id="${slug}_p1" value="${editData?.scores[slug]?.p1 || ''}" style="width:50px; padding:5px; margin:0;"></td>
-                <td><input type="number" id="${slug}_p2" value="${editData?.scores[slug]?.p2 || ''}" style="width:50px; padding:5px; margin:0;"></td>
-                <td><input type="number" id="${slug}_p3" value="${editData?.scores[slug]?.p3 || ''}" style="width:50px; padding:5px; margin:0;"></td>
-                <td><input type="number" id="${slug}_ex" value="${editData?.scores[slug]?.ex || ''}" style="width:50px; padding:5px; margin:0;"></td>
-            </tr>`;
+    <!-- Quick Pillars -->
+    <section class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-10 relative z-20">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <div class="bg-white p-5 rounded-2xl shadow-xl border border-slate-100 text-center">
+                <div class="w-10 h-10 mx-auto mb-3 bg-amber-50 text-brandGold rounded-xl flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-book-open"></i>
+                </div>
+                <h4 class="font-bold text-slate-800 text-sm">Quality Education</h4>
+                <p class="text-xs text-slate-500 mt-1">Robust foundational curriculum.</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-xl border border-slate-100 text-center">
+                <div class="w-10 h-10 mx-auto mb-3 bg-amber-50 text-brandGold rounded-xl flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-shield-heart"></i>
+                </div>
+                <h4 class="font-bold text-slate-800 text-sm">Strong Moral Values</h4>
+                <p class="text-xs text-slate-500 mt-1">Character building first.</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-xl border border-slate-100 text-center">
+                <div class="w-10 h-10 mx-auto mb-3 bg-amber-50 text-brandGold rounded-xl flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-award"></i>
+                </div>
+                <h4 class="font-bold text-slate-800 text-sm">Discipline & Excellence</h4>
+                <p class="text-xs text-slate-500 mt-1">Fostering high standards.</p>
+            </div>
+            <div class="bg-white p-5 rounded-2xl shadow-xl border border-slate-100 text-center">
+                <div class="w-10 h-10 mx-auto mb-3 bg-amber-50 text-brandGold rounded-xl flex items-center justify-center text-lg font-bold">
+                    <i class="fa-solid fa-star"></i>
+                </div>
+                <h4 class="font-bold text-slate-800 text-sm">Bright Futures</h4>
+                <p class="text-xs text-slate-500 mt-1">Preparing leaders of tomorrow.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- About Section -->
+    <section id="about" class="py-16 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="bg-white rounded-3xl p-8 sm:p-12 shadow-sm border border-slate-100 grid grid-cols-1 lg:grid-cols-2 gap-8 items-center">
+            <div>
+                <span class="text-brandBlue font-bold text-xs uppercase tracking-widest bg-brandGold/20 px-3 py-1 rounded-full">About Our School</span>
+                <h2 class="text-3xl font-black text-brandNavy mt-3">Royal Academic School System</h2>
+                <p class="text-slate-600 mt-4 text-sm sm:text-base leading-relaxed">
+                    Located in Johnsonville Kpeh-Kpeh Town, Monrovia, we are dedicated to raising a generation of change. Our academic environment blends structured learning with character building and leadership to ensure every student succeeds from Daycare through 6th Grade.
+                </p>
+            </div>
+            <div class="bg-brandNavy text-white p-8 rounded-2xl shadow-lg border border-brandGold/20">
+                <h3 class="text-brandGold font-bold text-lg mb-2"><i class="fa-solid fa-bullseye mr-2"></i> Our Vision</h3>
+                <p class="text-sm text-slate-300 leading-relaxed">
+                    To be the leading elementary institution providing top-tier academic training combined with moral discipline and life skills for young children in Liberia.
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Admission Section Call-to-Action -->
+    <section id="admission" class="py-20 bg-slate-100 border-t border-slate-200">
+        <div class="max-w-4xl mx-auto px-4 text-center">
+            <span class="text-brandBlue font-bold text-xs uppercase tracking-widest bg-brandGold/30 px-3 py-1 rounded-full">Admissions Open</span>
+            <h2 class="text-3xl font-extrabold text-brandNavy mt-3">Join Royal Academic School System</h2>
+            <p class="text-slate-600 mt-2 text-sm sm:text-base max-w-xl mx-auto">
+                Give your child a foundation of quality education, strong moral values, and discipline in Johnsonville. Click below to open our registration form.
+            </p>
+            <button onclick="toggleAdmissionModal(true)" class="mt-6 bg-brandGold text-brandNavy font-extrabold px-8 py-4 rounded-xl shadow-lg hover:bg-brandGoldHover transition text-base inline-flex items-center gap-2">
+                <i class="fa-solid fa-file-pen"></i> Apply For Admission Now
+            </button>
+        </div>
+    </section>
+
+    <!-- Admission Form Modal Backdrop & Container -->
+    <div id="admission-modal" class="fixed inset-0 z-50 hidden bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+        <div class="bg-white rounded-3xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto p-6 sm:p-8 relative border border-slate-100">
+            
+            <!-- Close Button -->
+            <button onclick="toggleAdmissionModal(false)" class="absolute top-5 right-5 text-slate-400 hover:text-brandNavy text-xl font-bold bg-slate-100 hover:bg-slate-200 w-10 h-10 rounded-full flex items-center justify-center transition">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <!-- Modal Header -->
+            <div class="mb-6 pr-10">
+                <span class="text-xs font-bold text-brandBlue uppercase tracking-wider bg-brandGold/20 px-2.5 py-1 rounded">RASS Registration</span>
+                <h3 class="text-2xl font-black text-brandNavy mt-2">Student Admission Form</h3>
+                <p class="text-xs sm:text-sm text-slate-500 mt-1">Fill out the details below. Notifications will be sent straight to your email via Formspree.</p>
+            </div>
+
+            <!-- Formspree Form -->
+            <form action="https://formspree.io/f/your-formspree-id" method="POST" class="space-y-5">
+                
+                <!-- Parent / Guardian Information -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Parent/Guardian Name *</label>
+                        <input type="text" name="parent_name" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brandGold focus:bg-white transition" placeholder="e.g. John Doe">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Phone Number *</label>
+                        <input type="tel" name="parent_phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brandGold focus:bg-white transition" placeholder="+231 ...">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Emergency Number *</label>
+                        <input type="tel" name="emergency_phone" required class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brandGold focus:bg-white transition" placeholder="Alternative contact">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 uppercase mb-1">Email Address (Optional)</label>
+                        <input type="email" name="email" class="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-brandGold focus:bg-white transition" placeholder="parent@example.com">
+                    </div>
+                </div>
+
+                <hr class="border-slate-100 my-4">
+
+                <!-- Dynamic Children Section -->
+                <div>
+                    <div class="flex justify-between items-center mb-3">
+                        <label class="block text-sm font-extrabold text-brandNavy uppercase tracking-wider">Children Information</label>
+                        <button type="button" onclick="addChildRow()" class="text-xs bg-brandNavy text-brandGold font-bold px-3 py-1.5 rounded-lg hover:bg-brandBlue transition flex items-center gap-1">
+                            <i class="fa-solid fa-plus"></i> Add Another Child
+                        </button>
+                    </div>
+
+                    <div id="children-container" class="space-y-4">
+                        <!-- Child Row Template -->
+                        <div class="child-row bg-slate-50 p-4 rounded-2xl border border-slate-200 relative space-y-3">
+                            <div class="flex justify-between items-center">
+                                <span class="text-xs font-bold text-slate-500 uppercase child-index-label">Child 1</span>
+                                <button type="button" onclick="removeChildRow(this)" class="text-red-500 hover:text-red-700 text-xs font-bold hidden remove-btn">
+                                    <i class="fa-solid fa-trash"></i> Remove
+                                </button>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-slate-600 mb-1">Student's Full Name *</label>
+                                <input type="text" name="child_name[]" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brandGold" placeholder="Full name of child">
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Class/Grade *</label>
+                                    <select name="child_class[]" required class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brandGold">
+                                        <option value="">Select Class</option>
+                                        <option value="Daycare">Daycare</option>
+                                        <option value="ABC">ABC</option>
+                                        <option value="Kindergarten 1 (K1)">Kindergarten 1 (K1)</option>
+                                        <option value="Kindergarten 2 (K2)">Kindergarten 2 (K2)</option>
+                                        <option value="1st Grade">1st Grade</option>
+                                        <option value="2nd Grade">2nd Grade</option>
+                                        <option value="3rd Grade">3rd Grade</option>
+                                        <option value="4th Grade">4th Grade</option>
+                                        <option value="5th Grade">5th Grade</option>
+                                        <option value="6th Grade">6th Grade</option>
+                                    </select>
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-slate-600 mb-1">Medical / Health Issues?</label>
+                                    <select name="has_medical[]" onchange="toggleMedicalInput(this)" class="w-full bg-white border border-slate-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-brandGold">
+                                        <option value="No">No</option>
+                                        <option value="Yes">Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <!-- Conditional Medical Condition Input -->
+                            <div class="medical-input-wrapper hidden">
+                                <label class="block text-xs font-semibold text-red-600 mb-1">Please name the condition/sickness:</label>
+                                <input type="text" name="medical_details[]" class="w-full bg-white border border-red-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:border-red-400" placeholder="Specify any allergies or medical requirements">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Submit Button -->
+                <div class="pt-4">
+                    <button type="submit" class="w-full bg-brandNavy text-brandGold font-extrabold py-3.5 rounded-xl shadow-lg hover:bg-brandBlue transition text-center text-base">
+                        Submit Registration Application <i class="fa-solid fa-paper-plane ml-2"></i>
+                    </button>
+                    <p class="text-center text-[10px] text-slate-400 mt-2">By submitting, you agree to allow RASS administration to contact you regarding enrollment.</p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="bg-brandNavy text-white py-12 border-t border-brandBlue">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+            <div>
+                <h3 class="font-bold text-lg text-brandGold">Royal Academic School System</h3>
+                <p class="text-xs text-slate-400 mt-1">Johnsonville Kpeh-Kpeh Town, Monrovia - Liberia</p>
+                <p class="text-xs text-slate-400 mt-1"><i class="fa-solid fa-phone text-brandGold mr-1"></i> +231 77 741 3546 / +231 77 934 6510</p>
+            </div>
+            <div class="md:text-right text-xs text-slate-400">
+                <p>&copy; 2017 - 2026 RASS. All rights reserved.</p>
+                <p class="mt-1">Powered by Blessed Studios</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- JavaScript Controllers -->
+    <script>
+        // Mobile menu toggle
+        const menuBtn = document.getElementById('menu-btn');
+        const mobileMenu = document.getElementById('mobile-menu');
+        menuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
         });
 
-        if(editData) {
-            currentId = editData.id;
-            document.getElementById('s_name').value = editData.student_name;
-            document.getElementById('s_class').value = editData.student_class;
-            document.getElementById('s_remarks').value = editData.teacher_remarks || "";
-            document.getElementById('form-title').innerText = "Editing: " + editData.student_name;
-        } else {
-            currentId = null;
-            document.getElementById('s_name').value = "";
-            document.getElementById('form-title').innerText = "New Student Entry";
+        // Admission Modal toggle
+        function toggleAdmissionModal(open) {
+            const modal = document.getElementById('admission-modal');
+            if (open) {
+                modal.classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                modal.classList.add('hidden');
+                document.body.style.overflow = 'auto';
+            }
         }
-    }
 
-    // DATABASE OPERATIONS
-    async function loadStudents() {
-        const { data } = await _sb.from('grades').select('*').eq('teacher_id', localStorage.getItem('tID'));
-        const list = document.getElementById('student-list');
-        list.innerHTML = data && data.length ? "" : "<p style='text-align:center;'>No students found.</p>";
-        if(data) {
-            data.forEach(s => {
-                const card = document.createElement('div');
-                card.className = 'student-card';
-                card.innerHTML = `<div><strong>${s.student_name}</strong><br><small>${s.student_class}</small></div>`;
-                const btn = document.createElement('button');
-                btn.className = 'btn-navy'; btn.style.width = 'auto'; btn.style.padding = '8px 15px'; btn.innerText = "Edit";
-                btn.onclick = () => showGrading(s);
-                card.appendChild(btn);
-                list.appendChild(card);
+        // Add child row dynamically
+        function addChildRow() {
+            const container = document.getElementById('children-container');
+            const firstRow = container.querySelector('.child-row');
+            const newRow = firstRow.cloneNode(true);
+            
+            newRow.querySelectorAll('input').forEach(input => input.value = '');
+            newRow.querySelectorAll('select').forEach(select => select.selectedIndex = 0);
+            newRow.querySelector('.medical-input-wrapper').classList.add('hidden');
+            
+            container.appendChild(newRow);
+            updateRowLabels();
+        }
+
+        // Remove child row dynamically
+        function removeChildRow(btn) {
+            const row = btn.closest('.child-row');
+            row.remove();
+            updateRowLabels();
+        }
+
+        // Update row numbers and visibility of delete button
+        function updateRowLabels() {
+            const rows = document.querySelectorAll('.child-row');
+            rows.forEach((row, index) => {
+                row.querySelector('.child-index-label').textContent = `Child ${index + 1}`;
+                const removeBtn = row.querySelector('.remove-btn');
+                if (rows.length > 1) {
+                    removeBtn.classList.remove('hidden');
+                } else {
+                    removeBtn.classList.add('hidden');
+                }
             });
         }
-    }
 
-    async function saveData() {
-        const name = document.getElementById('s_name').value;
-        if(!name) return alert("Please enter Student Name");
-        
-        let scores = {};
-        subjects.forEach(sub => {
-            let slug = sub.toLowerCase().replace(/\s/g, '');
-            scores[slug] = {
-                p1: document.getElementById(slug+'_p1').value,
-                p2: document.getElementById(slug+'_p2').value,
-                p3: document.getElementById(slug+'_p3').value,
-                ex: document.getElementById(slug+'_ex').value
-            };
-        });
-
-        const row = {
-            student_name: name,
-            student_class: document.getElementById('s_class').value,
-            scores: scores,
-            teacher_remarks: document.getElementById('s_remarks').value,
-            teacher_id: localStorage.getItem('tID'),
-            academic_year: "2025-2026"
-        };
-
-        const { error } = currentId ? await _sb.from('grades').update(row).eq('id', currentId) : await _sb.from('grades').insert([row]);
-        
-        if(error) alert("Database Error: " + error.message);
-        else { alert("Successfully Saved!"); showDash(); }
-    }
-</script>
+        // Toggle medical details input field visibility
+        function toggleMedicalInput(selectElem) {
+            const row = selectElem.closest('.child-row');
+            const medicalWrapper = row.querySelector('.medical-input-wrapper');
+            if (selectElem.value === 'Yes') {
+                medicalWrapper.classList.remove('hidden');
+            } else {
+                medicalWrapper.classList.add('hidden');
+                medicalWrapper.querySelector('input').value = '';
+            }
+        }
+    </script>
 </body>
-        </html>
+</html>
